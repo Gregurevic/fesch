@@ -12,14 +12,16 @@ namespace fesch.Services.Scheduler.Structure
         public static void Set(GRBModel model)
         {
             model.SetObjective(
+                MinimizeChamnbers() +
                 EvenLoad() +
-                MinimizeChamnbers(), 
-                GRB.MINIMIZE);
+                Availability(), 
+                GRB.MINIMIZE
+            );
         }
 
         private static GRBLinExpr MinimizeChamnbers()
         {
-            int penaltyScore = 10000;
+            int penaltyScore = 10;
             GRBLinExpr penalty = 0;
             for (int i = 0; i < I; i++)
             {
@@ -43,16 +45,36 @@ namespace fesch.Services.Scheduler.Structure
             int P = Structures.Service.Instructors.FindAll(i => i.President).Count;
             for (int p = 0; p < P; p++)
             {
-                penalty.AddTerm(1, Variables._objective_PresidentPositiveDeviation[p]);
-                penalty.AddTerm(1, Variables._objective_PresidentNegativeDeviation[p]);
+                penalty.AddTerm(1 / P, Variables._objective_PresidentPositiveDeviation[p]);
+                penalty.AddTerm(- 1 / P, Variables._objective_PresidentNegativeDeviation[p]);
             }
             int S = Structures.Service.Instructors.FindAll(i => i.Secretary).Count;
             for (int s = 0; s < S; s++)
             {
-                penalty.AddTerm(1, Variables._objective_SecretaryPositiveDeviation[s]);
-                penalty.AddTerm(1, Variables._objective_SecretaryNegativeDeviation[s]);
+                penalty.AddTerm(1 / S, Variables._objective_SecretaryPositiveDeviation[s]);
+                penalty.AddTerm(-1 / S, Variables._objective_SecretaryNegativeDeviation[s]);
             }
-            return penaltyScore * penalty;
+            return penalty *penaltyScore;
+        }
+
+        private static GRBLinExpr Availability()
+        {
+            int penaltyScore = 1000;
+            GRBLinExpr penalty = 0;
+            for (int i = 0; i < I; i++)
+            {
+                for (int d = 0; d < D; d++)
+                {
+                    for (int c = 0; c < C; c++)
+                    {
+                        if (!Structures.Service.Instructors[i].Presence[d])
+                        {
+                            penalty.AddTerm(1, Variables.iGRB[i, d, c]);
+                        }
+                    }
+                }
+            }
+            return penalty * penaltyScore;
         }
     }
 }

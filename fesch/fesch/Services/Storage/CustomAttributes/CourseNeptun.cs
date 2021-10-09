@@ -15,7 +15,7 @@ namespace fesch.Services.Storage.CustomAttributes
             {
                 /// tanszékek kódjai a https://www.vik.bme.hu/page/43/ alapján -> (AU|ET|EE|EV|FO|HI|MM|NF|MA|HV|EV|MH|TT|VE|VG|VM|MI|II|TM) VISZONT! ez helytelen, egyelőre cserélve bármilyen karakterre
                 if (!Regex.Match(value, @"\bBME(VI|TE)([A-Z]|[0-9]){6}\b").Success)
-                    throw new NeptunException("Invalid Neptun code construction attempt!");
+                    throw new CourseNeptunException("Invalid Neptun Course code construction attempt!");
                 code = value;
             }
         }

@@ -119,6 +119,7 @@
   <ItemGroup>
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Services\Exceptions\CourseNeptunException.cs" />
     <Compile Include="Services\Exceptions\NeptunException.cs" />
     <Compile Include="Services\Exceptions\StructureSchedulerException.cs" />
     <Compile Include="Services\IO\Excel.cs" />

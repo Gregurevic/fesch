@@ -17,10 +17,9 @@ namespace fesch.Services.Scheduler.Structure
             SecretaryLoads(model);
             /// regular constraints
             NoDuplicateInstructors(model);
-            DailyInstructorCount(model);
             FragmentCount(model);
             BothRolesArePresent(model);
-            ValidFragmentTutions(model);
+            FragmentTutions(model);
             EnoughFragmentsPerTution(model);
         }
 
@@ -46,7 +45,7 @@ namespace fesch.Services.Scheduler.Structure
                         }
                     }
                     model.AddConstr(
-                        P * (Variables._objective_PresidentPositiveDeviation[idx] - Variables._objective_PresidentNegativeDeviation[idx]) 
+                        Variables._objective_PresidentPositiveDeviation[idx] - Variables._objective_PresidentNegativeDeviation[idx] 
                         == P * sums[idx] - D, "PresidentLoads_" + idx
                     );
                     idx++;
@@ -74,7 +73,7 @@ namespace fesch.Services.Scheduler.Structure
                         }
                     }
                     model.AddConstr(
-                        S * (Variables._objective_SecretaryPositiveDeviation[idx] - Variables._objective_SecretaryNegativeDeviation[idx])
+                        Variables._objective_SecretaryPositiveDeviation[idx] - Variables._objective_SecretaryNegativeDeviation[idx]
                         == S * sums[idx] - D, "SecretaryLoads_" + idx
                     );
                     idx++;
@@ -87,35 +86,17 @@ namespace fesch.Services.Scheduler.Structure
         {
             GRBLinExpr[] sums = new GRBLinExpr[I * D];
             for (int id = 0; id < I * D; id++) { sums[id] = 0; }
+            int idx = 0;
             for (int i = 0; i < I; i++)
             {
                 for (int d = 0; d < D; d++)
                 {
                     for (int c = 0; c < C; c++)
                     {
-                        sums[i * d + d].AddTerm(1, Variables.iGRB[i, d, c]);
+                        sums[idx].AddTerm(1, Variables.iGRB[i, d, c]);
                     }
-                    model.AddConstr(sums[i * d + d] <= 1, "NoDuplicateInstructors_" + i + "_" + d);
-                }
-            }
-        }
-
-        /// minden napra 2 vagy 0 instruktort osztunk
-        /// definiálunk szabad, bináris változókat: minden összeg értéke legyen egy külön bináris változó értéke szorozva kettővel
-        /// ergo minden összeg értéke legyen 0 vagy 2
-        private static void DailyInstructorCount(GRBModel model)
-        {
-            GRBLinExpr[] sums = new GRBLinExpr[D * C];
-            for (int dc = 0; dc < D * C; dc++) { sums[dc] = 0; }
-            for (int d = 0; d < D; d++)
-            {
-                for (int c = 0; c < C; c++)
-                {
-                    for (int i = 0; i < I; i++)
-                    {
-                        sums[d * c + c].AddTerm(1, Variables.iGRB[i, d, c]);
-                    }
-                    model.AddConstr(sums[d * c + c] == 2 * Variables._constr_DailyInstructorCount[d * c + c], "DailyInstructorCount_" + d + "_" + c);
+                    model.AddConstr(sums[idx] <= 1, "NoDuplicateInstructors_" + i + "_" + d);
+                    idx++;
                 }
             }
         }
@@ -140,37 +121,43 @@ namespace fesch.Services.Scheduler.Structure
         /// legyen elnök és titkár is beosztva, ezek diszjunkt halmazok, ez biztosítva van a nyers adatokban
         private static void BothRolesArePresent(GRBModel model)
         {
-            GRBLinExpr sumP = 0;
-            GRBLinExpr sumS = 0;
+            GRBLinExpr[] sumsP = new GRBLinExpr[D * C];
+            GRBLinExpr[] sumsS = new GRBLinExpr[D * C];
+            for (int dc = 0; dc < D * C; dc++) { sumsP[dc] = 0; sumsS[dc] = 0; }
+            int idx = 0;
             for (int d = 0; d < D; d++)
             {
                 for (int c = 0; c < C; c++)
                 {
                     for (int i = 0; i < I; i++)
                     {
-                        sumP.AddTerm(Structures.Service.Instructors[i].President ? 1 : 0, Variables.iGRB[i, d, c]);
-                        sumS.AddTerm(Structures.Service.Instructors[i].Secretary ? 1 : 0, Variables.iGRB[i, d, c]);
+                        if (Structures.Service.Instructors[i].President) { sumsP[idx].AddTerm(1, Variables.iGRB[i, d, c]); }
+                        if (Structures.Service.Instructors[i].Secretary) { sumsS[idx].AddTerm(1, Variables.iGRB[i, d, c]); }
                     }
-                    model.AddConstr(sumP == 1, "BothRolesArePresentP_" + d + "_" + c);
-                    model.AddConstr(sumS == 1, "BothRolesArePresentS_" + d + "_" + c);
+                    model.AddConstr(sumsP[idx] <= 1, "BothRolesArePresentP_" + d + "_" + c);
+                    model.AddConstr(sumsS[idx] <= 1, "BothRolesArePresentS_" + d + "_" + c);
+                    model.AddConstr(sumsP[idx] - sumsS[idx] == 0, "BothRolesArePresentE_" + d + "_" + c);
+                    idx++;
                 }
             }
         }
 
         /// valid infós és villanyos Fragment-eket hozzunk létre
         /// itt is constraint variable-t használunk, lásd fentebb
-        private static void ValidFragmentTutions(GRBModel model)
+        private static void FragmentTutions(GRBModel model)
         {
-            GRBLinExpr sumI = 0;
-            GRBLinExpr sumV = 0;
+            GRBLinExpr[] sumsI = new GRBLinExpr[D * C];
+            GRBLinExpr[] sumsV = new GRBLinExpr[D * C];
+            for (int dc = 0; dc < D * C; dc++) { sumsI[dc] = 0; sumsV[dc] = 0; }
+            int idx = 0;
             for (int d = 0; d < D; d++)
             {
                 for (int c = 0; c < C; c++)
                 {
                     for (int i = 0; i < I; i++)
                     {
-                        sumI.AddTerm(Structures.Service.Instructors[i].Tutions.Contains(Tution.mérnökinformatikus) ? 1 : 0, Variables.iGRB[i, d, c]);
-                        sumV.AddTerm(Structures.Service.Instructors[i].Tutions.Contains(Tution.villamosmérnöki) ? 1 : 0, Variables.iGRB[i, d, c]);
+                        if (Structures.Service.Instructors[i].Tutions.Contains(Tution.mérnökinformatikus)) { sumsI[idx].AddTerm(1, Variables.iGRB[i, d, c]); }
+                        if (Structures.Service.Instructors[i].Tutions.Contains(Tution.villamosmérnöki)) { sumsV[idx].AddTerm(1, Variables.iGRB[i, d, c]); }
                     }
                     /// sumP x sumS igazságtábla:
                     /// 
@@ -180,9 +167,17 @@ namespace fesch.Services.Scheduler.Structure
                     /// 2 I I I
                     /// 
                     /// kiszűri: (1;0), (0;1)
-                    model.AddConstr(sumI + sumV == 2 * Variables._constr_ValidFragmentTutions[d * c + c], "ValidFragmentTutions_" + d + "_" + c + "+");
+                    model.AddConstr(sumsI[idx] + sumsV[idx] == 
+                        2 * Variables._constr_FragmentTutions_s2[idx] + 
+                        3 * Variables._constr_FragmentTutions_s3[idx] +
+                        4 * Variables._constr_FragmentTutions_s4[idx]
+                        , "FragmentTutions_" + d + "_" + c + "+");
                     /// kiszűri: (1;1)
-                    model.AddQConstr(sumI * sumV == 2 * Variables._constr_ValidFragmentTutions[d * c + c], "ValidFragmentTutions_" + d + "_" + c + "*");
+                    model.AddQConstr(sumsI[idx] * sumsV[idx] == 
+                        2 * Variables._constr_FragmentTutions_p2[idx] +
+                        4 * Variables._constr_FragmentTutions_p4[idx]
+                        , "FragmentTutions_" + d + "_" + c + "*");
+                    idx++;
                 }
             }
         }
