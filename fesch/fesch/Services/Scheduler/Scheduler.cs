@@ -1,6 +1,5 @@
 ﻿using fesch.Services.Exceptions;
 using Gurobi;
-using System;
 
 namespace fesch.Services.Scheduler
 {
