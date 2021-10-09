@@ -13,8 +13,8 @@ namespace fesch.Services.Storage.CustomAttributes
             get { return code; }
             set
             {
-                /// tanszékek kódjai a https://www.vik.bme.hu/page/43/ alapján
-                if (!Regex.Match(value, @"\bBMEVI(AU|ET|EE|EV|FO|HI|MM|NF|MA|HV|EV|MH|TT|VE|VG|VM)([A-Z]|[0-9]){4}\b").Success)
+                /// tanszékek kódjai a https://www.vik.bme.hu/page/43/ alapján -> (AU|ET|EE|EV|FO|HI|MM|NF|MA|HV|EV|MH|TT|VE|VG|VM|MI|II|TM) VISZONT! ez helytelen, egyelőre cserélve bármilyen karakterre
+                if (!Regex.Match(value, @"\bBME(VI|TE)([A-Z]|[0-9]){6}\b").Success)
                     throw new NeptunException("Invalid Neptun code construction attempt!");
                 code = value;
             }
@@ -25,7 +25,7 @@ namespace fesch.Services.Storage.CustomAttributes
         }
         public bool Match(CourseNeptun anotherNeptun)
         {
-            return Code.Equals(anotherNeptun);
+            return code.Equals(anotherNeptun.Code);
         }
     }
 }

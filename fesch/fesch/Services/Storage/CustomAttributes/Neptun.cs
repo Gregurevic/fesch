@@ -24,7 +24,7 @@ namespace fesch.Services.Storage.CustomAttributes
         }
         public bool Match(Neptun anotherNeptun)
         {
-            return Code.Equals(anotherNeptun);
+            return code.Equals(anotherNeptun.Code);
         }
     }
 }

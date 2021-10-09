@@ -27,12 +27,12 @@ namespace fesch.Services.IO.Helper
         {
             ExcelWorksheet examiners = excelPackage.Workbook.Worksheets[worksheetName];
             /// examiners
-            int rowInit = 2;
-            int col = 0;
+            int rowInit = 3;
+            int col = 2;
             int row = rowInit;
             while (col <= examiners.Dimension.End.Column)
             {
-                DataModels.Service.FindInstructor(new Neptun(examiners.Cells[row, col].Text)).AddCourse(new CourseNeptun(examiners.Cells[1, col].Text));
+                DataModels.Service.FindInstructor(new Neptun(examiners.Cells[row, col].Text)).AddCourse(new CourseNeptun(examiners.Cells[2, col - 1].Text));
                 if (examiners.Cells[(row + 1), col].Value != null)
                 {
                     row++;
@@ -40,7 +40,8 @@ namespace fesch.Services.IO.Helper
                 else
                 {
                     row = rowInit;
-                    col++;
+                    /// merged cells above
+                    col+=2;
                 }
             }
         }
@@ -54,13 +55,14 @@ namespace fesch.Services.IO.Helper
         {
             ExcelWorksheet courses = excelPackage.Workbook.Worksheets["Vizsgáztatók"];
             /// courses
-            int colInit = 0;
-            for (int col = colInit; col <= courses.Dimension.End.Column; col++)
+            int colInit = 1;
+            /// merged cells
+            for (int col = colInit; col <= courses.Dimension.End.Column; col+=2)
             {
                 DataModels.Service.addCourse(new Course(
                     col - colInit,
-                    courses.Cells[0, col].Text,
-                    courses.Cells[1, col].Text
+                    courses.Cells[1, col].Text,
+                    courses.Cells[2, col].Text
                 ));
             }
         }
@@ -69,16 +71,16 @@ namespace fesch.Services.IO.Helper
         {
             ExcelWorksheet instructor = excelPackage.Workbook.Worksheets["Elérhetőségek"];
             /// instructors
-            int rowInit = 2;
+            int rowInit = 3;
             for (int row = rowInit; row <= instructor.Dimension.End.Row; row++)
             {
                 /// tution
                 List<Tution> tutions = new List<Tution>();
-                if (instructor.Cells[row, 7].Value != null) tutions.Add(Tution.mérnökinformatikus);
-                if (instructor.Cells[row, 8].Value != null) tutions.Add(Tution.villamosmérnöki);
+                if (instructor.Cells[row, 8].Value != null) tutions.Add(Tution.mérnökinformatikus);
+                if (instructor.Cells[row, 9].Value != null) tutions.Add(Tution.villamosmérnöki);
                 /// availability
                 List<bool> availability = new List<bool>();
-                for (int col = 11; col <= instructor.Dimension.End.Column; col++)
+                for (int col = 12; col <= instructor.Dimension.End.Column; col++)
                 {
                     availability.Add(instructor.Cells[row, col].Value != null);
                 }
@@ -87,15 +89,15 @@ namespace fesch.Services.IO.Helper
                     // Id
                     row - rowInit,
                     /// Name
-                    instructor.Cells[row, 0].Text,
+                    instructor.Cells[row, 1].Text,
                     ///Neptun
-                    instructor.Cells[row, 2].Text,
+                    instructor.Cells[row, 3].Text,
                     /// President
-                    instructor.Cells[row, 4].Value != null,
-                    /// Secretary
-                    instructor.Cells[row, 6].Value != null,
-                    /// Member
                     instructor.Cells[row, 5].Value != null,
+                    /// Secretary
+                    instructor.Cells[row, 7].Value != null,
+                    /// Member
+                    instructor.Cells[row, 6].Value != null,
                     /// Tutions
                     tutions,
                     /// Availability
@@ -108,28 +110,28 @@ namespace fesch.Services.IO.Helper
         {
             ExcelWorksheet student = excelPackage.Workbook.Worksheets["Véd"];
             // students
-            int rowInit = 1;
+            int rowInit = 2;
             for (int row = rowInit; row <= student.Dimension.End.Row; row++)
             {
                 DataModels.Service.addStudent(new Student(
                     /// Id
                     row - rowInit,
                     /// Name
-                    student.Cells[row, 8].Text,
-                    /// Neptun
                     student.Cells[row, 9].Text,
+                    /// Neptun
+                    student.Cells[row, 10].Text,
                     /// Level
-                    student.Cells[row, 4].Text,
-                    /// Language
                     student.Cells[row, 5].Text,
-                    /// Tution
+                    /// Language
                     student.Cells[row, 6].Text,
+                    /// Tution
+                    student.Cells[row, 7].Text,
                     /// Supervisor
-                    student.Cells[row, 12].Text,
+                    student.Cells[row, 13].Text,
                     /// FirstCourse
-                    student.Cells[row, 14].Text,
+                    student.Cells[row, 18].Text,
                     /// SecondCourse
-                    student.Cells[row, 17].Text
+                    student.Cells[row, 15].Text
                 ));
             }
         }

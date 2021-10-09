@@ -1,119 +1,210 @@
-﻿using fesch.Services.Storage;
+﻿using fesch.Services.Storage.CustomEnums;
+using fesch.Services.Storage.Scheduler;
 using Gurobi;
 
-namespace fesch.Services.Scheduler.ExamStructure
+namespace fesch.Services.Scheduler.Structure
 {
     static class Constraints
     {
-        static int I = Variables.iGRB.GetLength(0);
-        static int T = Variables.iGRB.GetLength(1);
-        static int R = Variables.iGRB.GetLength(2);
+        private static int I = Variables.iGRB.GetLength(0);
+        private static int D = Variables.iGRB.GetLength(1);
+        private static int C = Variables.iGRB.GetLength(2);
 
         public static void Set(GRBModel model)
         {
-            Constraints.NoDuplicateStudents(model);
-            Constraints.OneStudentPerTimeSlot(model);
-            Constraints.PostsArePresent(model);
-            Constraints.NoDuplicateInstructors(model);
+            /// objective constraints
+            PresidentLoads(model);
+            SecretaryLoads(model);
+            /// regular constraints
+            NoDuplicateInstructors(model);
+            DailyInstructorCount(model);
+            FragmentCount(model);
+            BothRolesArePresent(model);
+            ValidFragmentTutions(model);
+            EnoughFragmentsPerTution(model);
         }
 
-        public static void NoDuplicateStudents(GRBModel model)
+        /// két új változó (tömböt) vezetünk be,
+        /// amiknek értékül adjuk elnökönként hogy hányszor osztottuk be minusz az optimális értéket
+        /// a constraint-ben fel vannak szorozva az összes elnök számával a változók, hogy egész értékeket kapjunk
+        private static void PresidentLoads(GRBModel model)
         {
-            GRBLinExpr[] sum = new GRBLinExpr[S];
-            for (int s = 0; s < S; s++) { sum[s] = 0; }
-            for (int s = 0; s < S; s++)
-            {
-                for (int t = 0; t < T; t++)
-                {
-                    for (int r = 0; r < R; r++)
-                    {
-                        sum[s].AddTerm(1, Variables.sGRB[s, t, r]);
-                    }
-                }
-                model.AddConstr(sum[s] == 1, "NoDuplicateStudents" + s);
-            }
-        }
-        public static void OneStudentPerTimeSlot(GRBModel model)
-        {
-            GRBLinExpr[] sum = new GRBLinExpr[T];
-            for (int t = 0; t < T; t++) { sum[t] = 0; }
-            for (int t = 0; t < T; t++)
-            {
-                for (int r = 0; r < R; r++)
-                {
-                    for (int s = 0; s < S; s++)
-                    {
-                        sum[t].AddTerm(1, Variables.sGRB[s, t, r]);
-                    }
-                    
-                }
-                model.AddConstr(sum[t] <= 1, "OneStudentPerTimeSlot" + t);
-            }
-        }
-        public static void PostsArePresent(GRBModel model)
-        {
-            GRBLinExpr[] sumP = new GRBLinExpr[S * T * R];
-            GRBLinExpr[] sumS = new GRBLinExpr[S * T * R];
-            GRBLinExpr[] sumM = new GRBLinExpr[S * T * R];
-            GRBLinExpr[] sumE1 = new GRBLinExpr[S * T * R];
-            GRBLinExpr[] sumE2 = new GRBLinExpr[S * T * R];
-            for (int str = 0; str < S * T * R; str++)
-            {
-                sumP[str] = 0;
-                sumS[str] = 0;
-                sumM[str] = 0;
-                sumE1[str] = 0;
-                sumE2[str] = 0;
-            }
-            for (int s = 0; s < S; s++)
-            {
-                for (int t = 0; t < T; t++)
-                {
-                    for (int r = 0; r < R; r++)
-                    {
-                        
-                        for (int i = 0; i < I; i++)
-                        {
-                            if (DataModels.Service.getInstructor(i).President) { sumP[s * T + t].AddTerm(1, Variables.iGRB[i, t, r]); }
-                            if (DataModels.Service.getInstructor(i).Secretary) { sumS[s * T + t].AddTerm(1, Variables.iGRB[i, t, r]); }
-                            if (DataModels.Service.getInstructor(i).Member) { sumM[s * T + t].AddTerm(1, Variables.iGRB[i, t, r]); }
-                            if (DataModels.Service.getInstructor(i).CourseIds.
-                                FindAll(x => x == DataModels.Service.getStudent(s).CourseIds[0]).Count > 0) {
-                                    sumE1[s * T + t].AddTerm(1, Variables.iGRB[i, t, r]);
-                            }
-                            if (DataModels.Service.getStudent(s).CourseIds.Count > 1 &&
-                                DataModels.Service.getInstructor(i).CourseIds.
-                                FindAll(x => x == DataModels.Service.getStudent(s).CourseIds[1]).Count > 0) {
-                                    sumE2[s * T + t].AddTerm(1, Variables.iGRB[i, t, r]);
-                            }
-                        }
-                        model.AddConstr(sumP[s * T + t] - Variables.sGRB[s, t, r] >= 0, "PresidentForStudent" + s + "_" + t + "_" + r);
-                        model.AddConstr(sumS[s * T + t] - Variables.sGRB[s, t, r] >= 0, "SecretaryForStudent" + s + "_" + t + "_" + r);
-                        model.AddConstr(sumM[s * T + t] - Variables.sGRB[s, t, r] >= 0, "MemberForStudent" + s + "_" + t + "_" + r);
-                        model.AddConstr(sumE1[s * T + t] - Variables.sGRB[s, t, r] >= 0, "Examiner1ForStudent" + s + "_" + t + "_" + r);
-                        if (DataModels.Service.getStudent(s).CourseIds.Count == 2){
-                            model.AddConstr(sumE2[s * T + t] - Variables.sGRB[s, t, r] >= 0, "Examiner2ForStudent" + s + "_" + t + "_" + r);
-                        }
-                        
-                    }
-                }
-            }
-        }
-        public static void NoDuplicateInstructors(GRBModel model)
-        {
-            GRBLinExpr[] sum = new GRBLinExpr[I * T];
-            for (int it = 0; it < I * T; it++) { sum[it] = 0; }
+            GRBLinExpr required = D;
+            int P = Structures.Service.Instructors.FindAll(i => i.President).Count;
+            GRBLinExpr[] sums = new GRBLinExpr[P];
+            for (int p = 0; p < P; p++) { sums[p] = 0; }
+            int idx = 0;
             for (int i = 0; i < I; i++)
             {
-                for (int t = 0; t < T; t++)
+                if (Structures.Service.Instructors[i].President)
                 {
-                    for (int r = 0; r < R; r++)
+                    for (int d = 0; d < D; d++)
                     {
-                        sum[i * T + t].AddTerm(1, Variables.iGRB[i, t, r]);
+                        for (int c = 0; c < C; c++)
+                        {
+                            sums[idx].AddTerm(1, Variables.iGRB[i, d, c]);
+                        }
                     }
-                    model.AddConstr(sum[i * T + t] <= 1, "NoDuplicateInstructors" + i + "_" + t);
+                    model.AddConstr(
+                        P * (Variables._objective_PresidentPositiveDeviation[idx] - Variables._objective_PresidentNegativeDeviation[idx]) 
+                        == P * sums[idx] - D, "PresidentLoads_" + idx
+                    );
+                    idx++;
                 }
             }
+        }
+
+        /// ugyan az a logika, mint az elnököknél, lásd feljebb
+        private static void SecretaryLoads(GRBModel model)
+        {
+            GRBLinExpr required = D;
+            int S = Structures.Service.Instructors.FindAll(i => i.Secretary).Count;
+            GRBLinExpr[] sums = new GRBLinExpr[S];
+            for (int s = 0; s < S; s++) { sums[s] = 0; }
+            int idx = 0;
+            for (int i = 0; i < I; i++)
+            {
+                if (Structures.Service.Instructors[i].Secretary)
+                {
+                    for (int d = 0; d < D; d++)
+                    {
+                        for (int c = 0; c < C; c++)
+                        {
+                            sums[idx].AddTerm(1, Variables.iGRB[i, d, c]);
+                        }
+                    }
+                    model.AddConstr(
+                        S * (Variables._objective_SecretaryPositiveDeviation[idx] - Variables._objective_SecretaryNegativeDeviation[idx])
+                        == S * sums[idx] - D, "SecretaryLoads_" + idx
+                    );
+                    idx++;
+                }
+            }
+        }
+
+        /// ugyan azon instruktor egy napon belül csak egy terembe lehet beosztva
+        private static void NoDuplicateInstructors(GRBModel model)
+        {
+            GRBLinExpr[] sums = new GRBLinExpr[I * D];
+            for (int id = 0; id < I * D; id++) { sums[id] = 0; }
+            for (int i = 0; i < I; i++)
+            {
+                for (int d = 0; d < D; d++)
+                {
+                    for (int c = 0; c < C; c++)
+                    {
+                        sums[i * d + d].AddTerm(1, Variables.iGRB[i, d, c]);
+                    }
+                    model.AddConstr(sums[i * d + d] <= 1, "NoDuplicateInstructors_" + i + "_" + d);
+                }
+            }
+        }
+
+        /// minden napra 2 vagy 0 instruktort osztunk
+        /// definiálunk szabad, bináris változókat: minden összeg értéke legyen egy külön bináris változó értéke szorozva kettővel
+        /// ergo minden összeg értéke legyen 0 vagy 2
+        private static void DailyInstructorCount(GRBModel model)
+        {
+            GRBLinExpr[] sums = new GRBLinExpr[D * C];
+            for (int dc = 0; dc < D * C; dc++) { sums[dc] = 0; }
+            for (int d = 0; d < D; d++)
+            {
+                for (int c = 0; c < C; c++)
+                {
+                    for (int i = 0; i < I; i++)
+                    {
+                        sums[d * c + c].AddTerm(1, Variables.iGRB[i, d, c]);
+                    }
+                    model.AddConstr(sums[d * c + c] == 2 * Variables._constr_DailyInstructorCount[d * c + c], "DailyInstructorCount_" + d + "_" + c);
+                }
+            }
+        }
+
+        /// a beosztott instruktorok száma a szükséges fragmentek számának kétszerese kell legyen
+        private static void FragmentCount(GRBModel model)
+        {
+            GRBLinExpr sum = 0;
+            for (int i = 0; i < I; i++)
+            {
+                for (int d = 0; d < D; d++)
+                {
+                    for (int c = 0; c < C; c++)
+                    {
+                        sum.AddTerm(1, Variables.iGRB[i, d, c]);
+                    }
+                }
+            }
+            model.AddConstr(sum == 2 * Structures.Service.FragmentCount, "FragmentCount");
+        }
+
+        /// legyen elnök és titkár is beosztva, ezek diszjunkt halmazok, ez biztosítva van a nyers adatokban
+        private static void BothRolesArePresent(GRBModel model)
+        {
+            GRBLinExpr sumP = 0;
+            GRBLinExpr sumS = 0;
+            for (int d = 0; d < D; d++)
+            {
+                for (int c = 0; c < C; c++)
+                {
+                    for (int i = 0; i < I; i++)
+                    {
+                        sumP.AddTerm(Structures.Service.Instructors[i].President ? 1 : 0, Variables.iGRB[i, d, c]);
+                        sumS.AddTerm(Structures.Service.Instructors[i].Secretary ? 1 : 0, Variables.iGRB[i, d, c]);
+                    }
+                    model.AddConstr(sumP == 1, "BothRolesArePresentP_" + d + "_" + c);
+                    model.AddConstr(sumS == 1, "BothRolesArePresentS_" + d + "_" + c);
+                }
+            }
+        }
+
+        /// valid infós és villanyos Fragment-eket hozzunk létre
+        /// itt is constraint variable-t használunk, lásd fentebb
+        private static void ValidFragmentTutions(GRBModel model)
+        {
+            GRBLinExpr sumI = 0;
+            GRBLinExpr sumV = 0;
+            for (int d = 0; d < D; d++)
+            {
+                for (int c = 0; c < C; c++)
+                {
+                    for (int i = 0; i < I; i++)
+                    {
+                        sumI.AddTerm(Structures.Service.Instructors[i].Tutions.Contains(Tution.mérnökinformatikus) ? 1 : 0, Variables.iGRB[i, d, c]);
+                        sumV.AddTerm(Structures.Service.Instructors[i].Tutions.Contains(Tution.villamosmérnöki) ? 1 : 0, Variables.iGRB[i, d, c]);
+                    }
+                    /// sumP x sumS igazságtábla:
+                    /// 
+                    /// X 0 1 2
+                    /// 0 I H I
+                    /// 1 H H I
+                    /// 2 I I I
+                    /// 
+                    /// kiszűri: (1;0), (0;1)
+                    model.AddConstr(sumI + sumV == 2 * Variables._constr_ValidFragmentTutions[d * c + c], "ValidFragmentTutions_" + d + "_" + c + "+");
+                    /// kiszűri: (1;1)
+                    model.AddQConstr(sumI * sumV == 2 * Variables._constr_ValidFragmentTutions[d * c + c], "ValidFragmentTutions_" + d + "_" + c + "*");
+                }
+            }
+        }
+
+        /// elég infós és villanyos Fragmentet kell létrehozni
+        private static void EnoughFragmentsPerTution(GRBModel model)
+        {
+            GRBLinExpr sumI = 0;
+            GRBLinExpr sumV = 0;
+            for (int d = 0; d < D; d++)
+            {
+                for (int c = 0; c < C; c++)
+                {
+                    for (int i = 0; i < I; i++)
+                    {
+                        sumI.AddTerm(Structures.Service.Instructors[i].Tutions.Contains(Tution.mérnökinformatikus) ? 1 : 0, Variables.iGRB[i, d, c]);
+                        sumV.AddTerm(Structures.Service.Instructors[i].Tutions.Contains(Tution.villamosmérnöki) ? 1 : 0, Variables.iGRB[i, d, c]);
+                    }
+                }
+            }
+            model.AddConstr(sumI - Structures.Service.InfoFragmentCount >= 0, "EnoughFragmentsPerTution_I");
+            model.AddConstr(sumI - Structures.Service.VillFragmentCount >= 0, "EnoughFragmentsPerTution_V");
         }
     }
 }

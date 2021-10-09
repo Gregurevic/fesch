@@ -1,6 +1,5 @@
 ﻿using fesch.Services.IO;
 using fesch.Services.Scheduler;
-using System;
 
 namespace fesch
 {
@@ -21,8 +20,8 @@ namespace fesch
              */
 
             /// külső adatforrás
-            string pathFrom = "C://Masol//20212//bme//onlab1//fesch//input//input_001.xlsx";
-            string pathTo = "C://Masol//20212//bme//onlab1//fesch//output//output_001.xlsx";
+            string pathFrom = "C://Munka//bme//onlab//fesch//input//input_001.xlsx";
+            string pathTo = "C://Munka//bme//onlab//fesch//output//output_001.xlsx";
             bool timeLimit = false;
             int dayCount = 4;
             

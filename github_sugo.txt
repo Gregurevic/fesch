@@ -1,0 +1,7 @@
+cd ..
+cd ..
+cd Munka/bme/onlab
+git status
+git add .
+git commit -m "sample text"
+git push

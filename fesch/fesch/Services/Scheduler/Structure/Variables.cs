@@ -1,20 +1,28 @@
 ﻿using fesch.Services.Storage.Scheduler;
 using Gurobi;
 
-namespace fesch.Services.Scheduler.ExamStructure
+namespace fesch.Services.Scheduler.Structure
 {
     static class Variables
     {
+        /// dimensions
+        private static int I = Structures.Service.Instructors.Count;
+        private static int D = Structures.Service.DimensionD;
+        private static int C = Structures.Service.DimensionC;
+        /// variables
         public static GRBVar[,,] iGRB;
+        /// constraint helper variables
+        public static GRBVar[] _constr_DailyInstructorCount;
+        public static GRBVar[] _constr_ValidFragmentTutions;
+        /// objective helper variables
+        public static GRBVar[] _objective_PresidentPositiveDeviation;
+        public static GRBVar[] _objective_PresidentNegativeDeviation;
+        public static GRBVar[] _objective_SecretaryPositiveDeviation;
+        public static GRBVar[] _objective_SecretaryNegativeDeviation;
         public static void Set(GRBModel model)
         {
-            /// dimensions
-            int I = Structure.Service.Instructors.Count;
-            int D = Structure.Service.DimensionD;
-            int C = Structure.Service.DimensionC;
-            /// GRB Vars
+            /// variables
             iGRB = new GRBVar[I, D, C];
-            /// init
             for (int i = 0; i < I; i++)
             {
                 for (int d = 0; d < D; d++)
@@ -24,6 +32,40 @@ namespace fesch.Services.Scheduler.ExamStructure
                         iGRB[i, d, c] = model.AddVar(0.0, 1.0, 0.0, GRB.BINARY, "i_" + i + "_" + d + "_" + c);
                     }
                 }
+            }
+            /// constraint helper variables
+            _constr_DailyInstructorCount = new GRBVar[D * C];
+            for (int d = 0; d < D; d++)
+            {
+                for (int c = 0; c < C; c++)
+                {
+                    _constr_DailyInstructorCount[d * c + c] = model.AddVar(0.0, 1.0, 0.0, GRB.BINARY, "_constr_DailyInstructorCount_" + d + "_" + c);
+                }
+            }
+            _constr_ValidFragmentTutions = new GRBVar[D * C];
+            for (int d = 0; d < D; d++)
+            {
+                for (int c = 0; c < C; c++)
+                {
+                    _constr_ValidFragmentTutions[d * c + c] = model.AddVar(0.0, 1.0, 0.0, GRB.BINARY, "_constr_ValidFragmentTutions_" + d + "_" + c);
+                }
+            }
+            /// objective helper variables
+            int P = Structures.Service.Instructors.FindAll(i => i.President).Count;
+            _objective_PresidentPositiveDeviation = new GRBVar[P];
+            _objective_PresidentNegativeDeviation = new GRBVar[P];
+            for (int p = 0; p < P; p++)
+            {
+                _objective_PresidentPositiveDeviation[p] = model.AddVar(0.0, 1.0, 0.0, GRB.BINARY, "_objective_PresidentPositiveDeviation_" + p);
+                _objective_PresidentNegativeDeviation[p] = model.AddVar(0.0, 1.0, 0.0, GRB.BINARY, "_objective_PresidentNegativeDeviation_" + p);
+            }
+            int S = Structures.Service.Instructors.FindAll(i => i.Secretary).Count;
+            _objective_SecretaryPositiveDeviation = new GRBVar[S];
+            _objective_SecretaryNegativeDeviation = new GRBVar[S];
+            for (int s = 0; s < S; s++)
+            {
+                _objective_SecretaryPositiveDeviation[s] = model.AddVar(0.0, 1.0, 0.0, GRB.BINARY, "_objective_SecretaryPositiveDeviation_" + s);
+                _objective_SecretaryNegativeDeviation[s] = model.AddVar(0.0, 1.0, 0.0, GRB.BINARY, "_objective_SecretaryNegativeDeviation_" + s);
             }
         }
     }

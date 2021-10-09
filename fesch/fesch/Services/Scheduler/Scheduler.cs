@@ -1,4 +1,5 @@
-﻿using Gurobi;
+﻿using fesch.Services.Exceptions;
+using Gurobi;
 
 namespace fesch.Services.Scheduler
 {
@@ -25,12 +26,15 @@ namespace fesch.Services.Scheduler
             env.Start();
             model = new GRBModel(env);
 
-            ExamStructure.Variables.Set(model);
-            ExamStructure.Constraints.Set(model);
-            ExamStructure.Objective.Set(model);
+            Structure.Variables.Set(model);
+            Structure.Constraints.Set(model);
+            Structure.Objective.Set(model);
+            model.ComputeIIS();
             model.Optimize();
-            ExamStructure.Reader.Get();
+            if (model.Status == GRB.Status.OPTIMAL) { Structure.Reader.Get(); }
+                else { throw new StructureSchedulerException("The structure model proved to be infeasible."); }
         }
+
         public void ScheduleExamStructure(int numberOfDaysAvailableToConductTheExam)
         {
             GRBEnv env = new GRBEnv(true);
@@ -38,11 +42,11 @@ namespace fesch.Services.Scheduler
             env.Start();
             model = new GRBModel(env);
 
-            ExamStructure.Variables.Set(model);
-            ExamStructure.Constraints.Set(model);
-            ExamStructure.Objective.Set(model);
+            Structure.Variables.Set(model);
+            Structure.Constraints.Set(model);
+            Structure.Objective.Set(model);
             model.Optimize();
-            ExamStructure.Reader.Get();
+            Structure.Reader.Get();
         }
         public void ScheduleExamAttendants()
         {

@@ -6,42 +6,45 @@ using System.Collections.Generic;
 
 namespace fesch.Services.Storage.Scheduler
 {
-    public class Structure
+    public class Structures
     {
-        private static Structure instance = null;
-        public static Structure Service
+        private static Structures instance = null;
+        public static Structures Service
         {
             get
             {
                 if (instance == null)
                 {
-                    instance = new Structure();
+                    instance = new Structures();
                 }
                 return instance;
             }
         }
         public int DimensionD { get; set; }
         public int DimensionC { get; set; }
-        public int TutionInfoCount { get; set; }
+        public int FragmentCount { get; set; }
+        public int InfoFragmentCount { get; set; }
+        public int VillFragmentCount { get; set; }
         public List<StructureInstructor> Instructors { get; set; }
-        public Structure()
+        public Structures()
         {
-            /// calculate Days' Dimension
             double longExamInfoCount = DataModels.Service.getStudents().FindAll(
                 s => (s.Language == Language.angol || s.Level == Level.MSc) && s.Tution == Tution.mérnökinformatikus).Count;
-            double longExamVillanyCount = DataModels.Service.getStudents().FindAll(
+            double longExamVillCount = DataModels.Service.getStudents().FindAll(
                 s => (s.Language == Language.angol || s.Level == Level.MSc) && s.Tution == Tution.villamosmérnöki).Count;
             double shortExamInfoCount = DataModels.Service.getStudents().FindAll(s => s.Tution == Tution.mérnökinformatikus).Count - longExamInfoCount;
-            double shortExamVillanyCount = DataModels.Service.getStudents().FindAll(s => s.Tution == Tution.villamosmérnöki).Count - longExamVillanyCount;
-            double days = Math.Ceiling(longExamInfoCount / 8) + Math.Ceiling(longExamVillanyCount / 8) + 
-                Math.Ceiling(shortExamInfoCount / 10) + Math.Ceiling(shortExamVillanyCount / 10);
-            DimensionD = (days >= 10) ? 10 : (int)(days);
-            /// calculate Chambers' Dimension
-            double chambers = Math.Ceiling(days / 10);
-            DimensionC = (int)(chambers);
-            /// calculate the number of "mérnökinformatikus
+            double shortExamVillCount = DataModels.Service.getStudents().FindAll(s => s.Tution == Tution.villamosmérnöki).Count - longExamVillCount;
             double infoCount = Math.Ceiling(longExamInfoCount / 8) + Math.Ceiling(shortExamInfoCount / 10);
-            TutionInfoCount = (int)(infoCount);
+            double villCount = Math.Ceiling(longExamVillCount / 8) + Math.Ceiling(shortExamVillCount / 10);
+            double fragmentCount = infoCount + villCount;
+            double days = (fragmentCount >= 10) ? 10 : (int)(fragmentCount);
+            double chambers = Math.Ceiling(fragmentCount / 10);
+            /// calculated attributes
+            DimensionD = (int)(days);
+            DimensionC = (int)(chambers);
+            FragmentCount = (int)(fragmentCount);
+            InfoFragmentCount = (int)(infoCount);
+            VillFragmentCount = (int)(villCount);
             /// generate Structure instructors from DataModel instructors
             Instructors = new List<StructureInstructor>();
             int timeslotsPerDay = 10;
@@ -54,7 +57,7 @@ namespace fesch.Services.Storage.Scheduler
                     /// check every day if the instructor is available
                     /// [NOTE] a day consists of 10 timeslots -> timeslotsPerDay = 10
                     /// [NOTE] an istructor is available if he is available from 9:00 'till 17:00
-                    for (int a = ((i.Availability.Count - 1) - DimensionD * timeslotsPerDay); a <= (i.Availability.Count - 1); a+= timeslotsPerDay)
+                    for (int a = (i.Availability.Count - DimensionD * timeslotsPerDay); a < i.Availability.Count ; a+= timeslotsPerDay)
                     {
                         presence.Add(
                             i.Availability[a + 1] &&
