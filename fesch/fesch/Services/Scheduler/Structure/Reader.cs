@@ -1,6 +1,6 @@
 ﻿using fesch.Services.Storage.CustomEnums;
 using fesch.Services.Storage.Scheduler;
-using fesch.Services.Storage.Scheduler.AttendantsModel;
+using fesch.Services.Storage.Scheduler.StructureModel;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -45,7 +45,7 @@ namespace fesch.Services.Scheduler.Structure
                         if (FragmentTutions.ToArray().Length == 1) { FragmentTution = FragmentTutions.ToArray()[0]; }
                             else { adjustmentIndex.Add(index); }
                         /// generate Fragment
-                        Attendants.Service.Fragments.Add(new Fragment(
+                        Structures.Service.Fragments.Add(new Fragment(
                             index,
                             d,
                             c,
@@ -57,10 +57,10 @@ namespace fesch.Services.Scheduler.Structure
                     }
                 }
             }
-            int adjustment = Attendants.Service.Fragments.FindAll(f => f.Tution == Tution.INFO).Count - Structures.Service.InfoFragmentCount;
+            int adjustment = Structures.Service.Fragments.FindAll(f => f.Tution == Tution.INFO).Count - Structures.Service.InfoFragmentCount;
             for (int a = 0; a < adjustment; a++)
             {
-                Attendants.Service.Fragments.Find(f => f.Id == adjustmentIndex[a]).Tution = Tution.VILL;
+                Structures.Service.Fragments.Find(f => f.Id == adjustmentIndex[a]).Tution = Tution.VILL;
             }
         }
     }

@@ -1,7 +1,4 @@
-﻿using fesch.Services.Storage.Scheduler.AttendantsModel;
-using System.Collections.Generic;
-
-namespace fesch.Services.Storage.Scheduler
+﻿namespace fesch.Services.Storage.Scheduler
 {
     class Attendants
     {
@@ -17,7 +14,8 @@ namespace fesch.Services.Storage.Scheduler
                 return instance;
             }
         }
-        private Attendants() {}
-        public List<Fragment> Fragments { get; set; }
+        private Attendants()
+        {
+        }
     }
 }

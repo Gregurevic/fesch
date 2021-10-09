@@ -150,7 +150,7 @@
     <Compile Include="Services\Storage\DataModel\Instructor.cs" />
     <Compile Include="Services\Storage\DataModel\Student.cs" />
     <Compile Include="Services\Storage\FinalExam\FinalExam.cs" />
-    <Compile Include="Services\Storage\Scheduler\AttendantsModel\Fragment.cs" />
+    <Compile Include="Services\Storage\Scheduler\StructureModel\Fragment.cs" />
     <Compile Include="Services\Storage\Scheduler\Structures.cs" />
     <Compile Include="Services\Storage\Scheduler\StructureModel\StructureInstructor.cs" />
   </ItemGroup>
@@ -158,6 +158,8 @@
     <None Include="App.config" />
     <None Include="packages.config" />
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <Folder Include="Services\Storage\Scheduler\AttendantsModel\" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

@@ -1,6 +1,6 @@
 ﻿using fesch.Services.Storage;
 using fesch.Services.Storage.Scheduler;
-using fesch.Services.Storage.Scheduler.AttendantsModel;
+using fesch.Services.Storage.Scheduler.StructureModel;
 using OfficeOpenXml;
 using OfficeOpenXml.Style;
 using System.IO;
@@ -38,7 +38,7 @@ namespace fesch.Services.IO.Helper
             }
             /// data
             int j = 2;
-            foreach (Fragment f in Attendants.Service.Fragments)
+            foreach (Fragment f in Structures.Service.Fragments)
             {
                 w.Cells[1, j].Value = f.DayIndex;
                 w.Cells[2, j].Value = f.ChamberIndex;

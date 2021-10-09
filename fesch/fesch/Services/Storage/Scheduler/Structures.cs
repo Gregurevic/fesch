@@ -26,7 +26,8 @@ namespace fesch.Services.Storage.Scheduler
         public int InfoFragmentCount { get; set; }
         public int VillFragmentCount { get; set; }
         public List<StructureInstructor> Instructors { get; set; }
-        public Structures()
+        public List<Fragment> Fragments { get; set; }
+        private Structures()
         {
             double longExamInfoCount = DataModels.Service.getStudents().FindAll(
                 s => (s.Language == Language.ENG || s.Level == Level.MSC) && (s.Tution == Tution.INFO || s.Tution == Tution.BPRO)).Count;
@@ -73,6 +74,7 @@ namespace fesch.Services.Storage.Scheduler
                     Instructors.Add(new StructureInstructor(i.Id, i.President, i.Secretary, i.Tutions, presence));
                 }
             }
+            Fragments = new List<Fragment>();
         }
     }
 }

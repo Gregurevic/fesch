@@ -1,6 +1,6 @@
 ﻿using fesch.Services.Storage.CustomEnums;
 
-namespace fesch.Services.Storage.Scheduler.AttendantsModel
+namespace fesch.Services.Storage.Scheduler.StructureModel
 {
     public class Fragment
     {

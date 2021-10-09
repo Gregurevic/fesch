@@ -68,5 +68,19 @@ namespace fesch.Services.Storage.CustomEnums
                     return "unimplemented Language";
             }
         }
+
+        public static string FromCombination(Tution tution, Level level, Language language)
+        {
+            if (tution == Tution.INFO && level == Level.BSC && language == Language.HUN) { return "5N-A8"; }
+            if (tution == Tution.INFO && level == Level.BSC && language == Language.ENG) { return "5NAA8"; }
+            if (tution == Tution.INFO && level == Level.MSC && language == Language.HUN) { return "5N-M8"; }
+            if (tution == Tution.INFO && level == Level.MSC && language == Language.ENG) { return "5NAM8"; }
+            if (tution == Tution.VILL && level == Level.BSC && language == Language.HUN) { return "5N-A7"; }
+            if (tution == Tution.VILL && level == Level.BSC && language == Language.ENG) { return "5NAA7"; }
+            if (tution == Tution.VILL && level == Level.MSC && language == Language.HUN) { return "5N-M7"; }
+            if (tution == Tution.VILL && level == Level.MSC && language == Language.ENG) { return "5NAM7"; }
+            if (tution == Tution.BPRO && level == Level.BSC && language == Language.HUN) { return "5N-A9"; }
+            return "unimplemented combination";
+        }
     }
 }
