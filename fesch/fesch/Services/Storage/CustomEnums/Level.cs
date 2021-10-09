@@ -2,7 +2,7 @@
 {
     public enum Level
     {
-        BSc,
-        MSc
+        BSC,
+        MSC
     }
 }

@@ -14,12 +14,12 @@ namespace fesch.Services.Storage.DataModel
         public CourseNeptun SecondCourse { get; set; }
         public Student(int id, string name, string neptun, string level, string language, string tution, string supervisor, string firstCourse, string secondCourse) : base(id, name, neptun)
         {
-            Level = (Level)Enum.Parse(typeof(Level), level, true);
-            Language = (Language)Enum.Parse(typeof(Language), language, true);
-            Tution = (Tution)Enum.Parse(typeof(Tution), tution, true);
+            Level = CustomEnumConverter.ToLevel(level);
+            Language = CustomEnumConverter.ToLanguage(language);
+            Tution = CustomEnumConverter.ToTution(tution);
             Supervisor = new Neptun(supervisor);
             FirstCourse = new CourseNeptun(firstCourse);
-            if (Language == Language.angol || Level == Level.MSc)
+            if (Language == Language.ENG || Level == Level.MSC)
             {
                 SecondCourse = new CourseNeptun(secondCourse);
             }

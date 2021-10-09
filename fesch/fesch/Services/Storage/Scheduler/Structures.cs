@@ -29,11 +29,11 @@ namespace fesch.Services.Storage.Scheduler
         public Structures()
         {
             double longExamInfoCount = DataModels.Service.getStudents().FindAll(
-                s => (s.Language == Language.angol || s.Level == Level.MSc) && s.Tution == Tution.mérnökinformatikus).Count;
+                s => (s.Language == Language.ENG || s.Level == Level.MSC) && (s.Tution == Tution.INFO || s.Tution == Tution.BPRO)).Count;
             double longExamVillCount = DataModels.Service.getStudents().FindAll(
-                s => (s.Language == Language.angol || s.Level == Level.MSc) && s.Tution == Tution.villamosmérnöki).Count;
-            double shortExamInfoCount = DataModels.Service.getStudents().FindAll(s => s.Tution == Tution.mérnökinformatikus).Count - longExamInfoCount;
-            double shortExamVillCount = DataModels.Service.getStudents().FindAll(s => s.Tution == Tution.villamosmérnöki).Count - longExamVillCount;
+                s => (s.Language == Language.ENG || s.Level == Level.MSC) && s.Tution == Tution.VILL).Count;
+            double shortExamInfoCount = DataModels.Service.getStudents().FindAll(s => s.Tution == Tution.INFO || s.Tution == Tution.BPRO).Count - longExamInfoCount;
+            double shortExamVillCount = DataModels.Service.getStudents().FindAll(s => s.Tution == Tution.VILL).Count - longExamVillCount;
             double infoCount = Math.Ceiling(longExamInfoCount / 8) + Math.Ceiling(shortExamInfoCount / 10);
             double villCount = Math.Ceiling(longExamVillCount / 8) + Math.Ceiling(shortExamVillCount / 10);
             double fragmentCount = infoCount + villCount;

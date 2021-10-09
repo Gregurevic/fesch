@@ -41,7 +41,7 @@ namespace fesch.Services.Scheduler.Structure
                                                Structures.Service.Instructors[iIndex1].Tutions.
                                                Intersect(Structures.Service.Instructors[iIndex2].Tutions) 
                                                select tution;
-                        Tution FragmentTution = Tution.mérnökinformatikus;
+                        Tution FragmentTution = Tution.INFO;
                         if (FragmentTutions.ToArray().Length == 1) { FragmentTution = FragmentTutions.ToArray()[0]; }
                             else { adjustmentIndex.Add(index); }
                         /// generate Fragment
@@ -57,10 +57,10 @@ namespace fesch.Services.Scheduler.Structure
                     }
                 }
             }
-            int adjustment = Attendants.Service.Fragments.FindAll(f => f.Tution == Tution.mérnökinformatikus).Count - Structures.Service.InfoFragmentCount;
+            int adjustment = Attendants.Service.Fragments.FindAll(f => f.Tution == Tution.INFO).Count - Structures.Service.InfoFragmentCount;
             for (int a = 0; a < adjustment; a++)
             {
-                Attendants.Service.Fragments.Find(f => f.Id == adjustmentIndex[a]).Tution = Tution.villamosmérnöki;
+                Attendants.Service.Fragments.Find(f => f.Id == adjustmentIndex[a]).Tution = Tution.VILL;
             }
         }
     }

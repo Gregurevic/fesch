@@ -2,7 +2,8 @@
 {
     public enum Tution
     {
-        mérnökinformatikus,
-        villamosmérnöki
+        INFO,
+        VILL,
+        BPRO
     }
 }

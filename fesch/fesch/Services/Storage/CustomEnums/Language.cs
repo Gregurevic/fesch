@@ -2,7 +2,7 @@
 {
     public enum Language
     {
-        angol,
-        magyar
+        ENG,
+        HUN
     }
 }

@@ -156,8 +156,8 @@ namespace fesch.Services.Scheduler.Structure
                 {
                     for (int i = 0; i < I; i++)
                     {
-                        if (Structures.Service.Instructors[i].Tutions.Contains(Tution.mérnökinformatikus)) { sumsI[idx].AddTerm(1, Variables.iGRB[i, d, c]); }
-                        if (Structures.Service.Instructors[i].Tutions.Contains(Tution.villamosmérnöki)) { sumsV[idx].AddTerm(1, Variables.iGRB[i, d, c]); }
+                        if (Structures.Service.Instructors[i].Tutions.Contains(Tution.INFO)) { sumsI[idx].AddTerm(1, Variables.iGRB[i, d, c]); }
+                        if (Structures.Service.Instructors[i].Tutions.Contains(Tution.VILL)) { sumsV[idx].AddTerm(1, Variables.iGRB[i, d, c]); }
                     }
                     /// sumP x sumS igazságtábla:
                     /// 
@@ -193,8 +193,8 @@ namespace fesch.Services.Scheduler.Structure
                 {
                     for (int i = 0; i < I; i++)
                     {
-                        sumI.AddTerm(Structures.Service.Instructors[i].Tutions.Contains(Tution.mérnökinformatikus) ? 1 : 0, Variables.iGRB[i, d, c]);
-                        sumV.AddTerm(Structures.Service.Instructors[i].Tutions.Contains(Tution.villamosmérnöki) ? 1 : 0, Variables.iGRB[i, d, c]);
+                        sumI.AddTerm(Structures.Service.Instructors[i].Tutions.Contains(Tution.INFO) ? 1 : 0, Variables.iGRB[i, d, c]);
+                        sumV.AddTerm(Structures.Service.Instructors[i].Tutions.Contains(Tution.VILL) ? 1 : 0, Variables.iGRB[i, d, c]);
                     }
                 }
             }

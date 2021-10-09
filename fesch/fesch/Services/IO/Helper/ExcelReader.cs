@@ -76,8 +76,8 @@ namespace fesch.Services.IO.Helper
             {
                 /// tution
                 List<Tution> tutions = new List<Tution>();
-                if (instructor.Cells[row, 8].Value != null) tutions.Add(Tution.mérnökinformatikus);
-                if (instructor.Cells[row, 9].Value != null) tutions.Add(Tution.villamosmérnöki);
+                if (instructor.Cells[row, 8].Value != null) tutions.Add(Tution.INFO);
+                if (instructor.Cells[row, 9].Value != null) tutions.Add(Tution.VILL);
                 /// availability
                 List<bool> availability = new List<bool>();
                 for (int col = 12; col <= instructor.Dimension.End.Column; col++)
