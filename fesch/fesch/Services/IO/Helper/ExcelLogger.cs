@@ -9,7 +9,7 @@ namespace fesch.Services.IO.Helper
 {
     static class ExcelLogger
     {
-        public static void LogExamStructure(string destination)
+        public static void LogExamStructure(string path)
         {
             ExcelPackage.LicenseContext = LicenseContext.NonCommercial;
             using (var excelPackage = new ExcelPackage())
@@ -17,7 +17,7 @@ namespace fesch.Services.IO.Helper
                 ExcelWorksheet w = excelPackage.Workbook.Worksheets.Add("Elnökök");
                 LogData(w);
                 w.Cells.AutoFitColumns();
-                FileInfo excelLogFile = new FileInfo(destination);
+                FileInfo excelLogFile = new FileInfo(path);
                 excelPackage.SaveAs(excelLogFile);
             }
         }

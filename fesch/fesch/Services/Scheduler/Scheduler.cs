@@ -64,7 +64,14 @@ namespace fesch.Services.Scheduler
             ExamAttendants.Constraints.Set(model);
             ExamAttendants.Objective.Set(model);
             model.Optimize();
-            ExamAttendants.Reader.Get();
+            if (model.Status == GRB.Status.OPTIMAL) {
+                ExamAttendants.Reader.Get();
+                model.Dispose();
+                env.Dispose();
+            } else {
+                model.ComputeIIS();
+                throw new AttendantSchedulerException("The attendant model proved to be infeasible.");
+            }
         }
 
         /// Visualizer for ScheduleExamStructure
