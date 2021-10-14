@@ -38,7 +38,7 @@ namespace fesch.Services.IO.Helper
             }
             /// data
             int j = 2;
-            foreach (Fragment f in Structures.Service.Fragments)
+            foreach (StructureFragment f in Structures.Service.Fragments)
             {
                 w.Cells[1, j].Value = f.DayIndex;
                 w.Cells[2, j].Value = f.ChamberIndex;

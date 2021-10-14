@@ -1,4 +1,5 @@
 ﻿using fesch.Services.Storage.CustomAttributes;
+using fesch.Services.Storage.CustomEnums;
 using fesch.Services.Storage.DataModel;
 using fesch.Services.Storage.Scheduler.AttendantsModel;
 using System.Collections.Generic;
@@ -26,6 +27,8 @@ namespace fesch.Services.Storage.Scheduler
         public int DimensionC { get; set; }
         public int DimensionS { get; set; }
         public int DimensionI { get; set; }
+        public int DimensionOS { get; set; } /// ordinal short
+        public int DimensionOL { get; set; } /// ordinal long
         private Attendants()
         {
             TimeSlots = new List<TimeSlot>();
@@ -41,13 +44,15 @@ namespace fesch.Services.Storage.Scheduler
                 /// courses
                 List<CourseNeptun> courses = new List<CourseNeptun>();
                 courses.Add(s.FirstCourse);
-                if (s.Language == CustomEnums.Language.ENG || s.Level == CustomEnums.Level.MSC) courses.Add(s.SecondCourse);
+                bool shortExam = s.Language == Language.HUN && s.Level == Level.BSC;
+                if (!shortExam) courses.Add(s.SecondCourse);
                 /// construction
                 Students.Add(new AttendantStudent(
                     s.Id,
                     s.Level,
                     s.Language,
                     s.Tution,
+                    shortExam,
                     DataModels.Service.getInstructors().Find(i => i.Neptun.Match(s.Supervisor)).Id,
                     courses
                 ));
@@ -66,6 +71,8 @@ namespace fesch.Services.Storage.Scheduler
             DimensionC = Structures.Service.DimensionC;
             DimensionS = Students.Count;
             DimensionI = Instructors.Count;
+            DimensionOS = 11;
+            DimensionOL = 9;
         }
     }
 }

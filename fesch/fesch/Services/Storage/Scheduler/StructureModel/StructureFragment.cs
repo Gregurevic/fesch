@@ -2,7 +2,7 @@
 
 namespace fesch.Services.Storage.Scheduler.StructureModel
 {
-    public class Fragment
+    public class StructureFragment
     {
         public int Id { get; set; }
         public int DayIndex { get; set; }
@@ -10,8 +10,8 @@ namespace fesch.Services.Storage.Scheduler.StructureModel
         public int PresidentId { get; set; }
         public int SecretaryId { get; set; }
         public Tution Tution { get; set; }
-        private Fragment() { }
-        public Fragment(int id, int dayIndex, int chamberIndex, int presidentId, int secretaryId, Tution tution)
+        private StructureFragment() { }
+        public StructureFragment(int id, int dayIndex, int chamberIndex, int presidentId, int secretaryId, Tution tution)
         {
             Id = id;
             DayIndex = dayIndex;

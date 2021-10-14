@@ -119,6 +119,7 @@
   <ItemGroup>
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Services\Exceptions\AttendantSchedulerException.cs" />
     <Compile Include="Services\Exceptions\CourseNeptunException.cs" />
     <Compile Include="Services\Exceptions\EnumConversionException.cs" />
     <Compile Include="Services\Exceptions\NeptunException.cs" />
@@ -150,6 +151,8 @@
     <Compile Include="Services\Storage\DataModel\Instructor.cs" />
     <Compile Include="Services\Storage\DataModel\Student.cs" />
     <Compile Include="Services\Storage\FinalExam\FinalExam.cs" />
+    <Compile Include="Services\Storage\Scheduler\AttendantsModel\AttendantInstructor.cs" />
+    <Compile Include="Services\Storage\Scheduler\AttendantsModel\AttendantStudent.cs" />
     <Compile Include="Services\Storage\Scheduler\AttendantsModel\TimeSlot.cs" />
     <Compile Include="Services\Storage\Scheduler\StructureModel\Fragment.cs" />
     <Compile Include="Services\Storage\Scheduler\Structures.cs" />

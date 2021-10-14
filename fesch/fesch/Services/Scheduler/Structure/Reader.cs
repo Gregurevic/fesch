@@ -45,7 +45,7 @@ namespace fesch.Services.Scheduler.Structure
                         if (FragmentTutions.ToArray().Length == 1) { FragmentTution = FragmentTutions.ToArray()[0]; }
                             else { adjustmentIndex.Add(index); }
                         /// generate Fragment
-                        Structures.Service.Fragments.Add(new Fragment(
+                        Structures.Service.Fragments.Add(new StructureFragment(
                             index,
                             d,
                             c,
