@@ -1,5 +1,4 @@
-﻿using fesch.Services.Exceptions;
-using fesch.Services.Storage.Scheduler;
+﻿using fesch.Services.Storage.Scheduler;
 using Gurobi;
 
 namespace fesch.Services.Scheduler.ExamAttendants
@@ -12,12 +11,9 @@ namespace fesch.Services.Scheduler.ExamAttendants
         public static int OS = Attendants.Service.DimensionOS;
         public static int OL = Attendants.Service.DimensionOL;
         /// variables
-        public static GRBVar[,] sfx; /// Student-Fragment-matriX
-        public static GRBVar[][] sor; /// Student-ORdinal-matrix
-        public static GRBVar[][] sme; /// Student-(Member-or-Examiner)-matrix
-        /// objective helper variables
-        public static GRBVar[,,] SAM; /// short-exam (instructors')availability matrix
-        public static GRBVar[,,] LAM; /// long-exam (instructors')availability matrix
+        public static GRBVar[,] sfx; /// student-Fragment-matriX
+        public static GRBVar[][] sor; /// student-ORDinal-matrix
+        public static GRBVar[][] sme; /// Student-Instructor(member-or-examiner)-Matrix
         public static void Set(GRBModel model)
         {
             /// variables
@@ -41,16 +37,36 @@ namespace fesch.Services.Scheduler.ExamAttendants
             sme = new GRBVar[S][];
             for (int s = 0; s < S; s++)
             {
-                sme[s] = new GRBVar[Attendants.Service.SME.Length];
+                sme[s] = new GRBVar[Attendants.Service.SME[s].Length];
                 for (int me = 0; me < sme[s].Length; me++)
                 {
                     sme[s][me] = model.AddVar(0.0, 1.0, 0.0, GRB.BINARY, "sme_" + s + "_" + me);
                 }
             }
             /// objective helper variables
+            InitUnavailabilityMatrix();
+        }
+
+        /// UNAVAILABILITY MATRICES
+        private static double[,,] SAM;
+        private static double[,,] LAM;
+
+        public static GRBQuadExpr Unavailable(GRBVar match, GRBVar[]ordinal, int i, int d)
+        {
+            double[,,] AM = (ordinal.Length == OS) ? SAM : LAM;
+            GRBQuadExpr product = 0;
+            for (int o = 0; o < ordinal.Length; o++)
+            {
+                product.Add(AM[i, d, o] * match * ordinal[o]);
+            }
+            return product;
+        }
+
+        private static void InitUnavailabilityMatrix()
+        {
             int I = Attendants.Service.GetI();
             int D = Attendants.Service.GetD();
-            SAM = new GRBVar[I, D, OS];
+            SAM = new double[I, D, OS];
             int time;
             int fromIdx;
             int toIdx;
@@ -66,12 +82,11 @@ namespace fesch.Services.Scheduler.ExamAttendants
                         fromIdx = time / 60; /// convert to instructor availability index from the above calculated 'time'
                         toIdx = (time + 40) / 60; /// current exam's finishing availability index
                         bool available = Attendants.Service.Availability[i, fromIdx] && Attendants.Service.Availability[i, toIdx];
-                        double mtxValue = available ? 1.0 : 0.0;
-                        SAM[i, d, os] = model.AddVar(mtxValue, mtxValue, 0.0, GRB.BINARY, "SAM_" + i + "_" + d + "_" + os);
+                        SAM[i, d, os] = available ? 0.0 : 1.0;
                     }
                 }
             }
-            LAM = new GRBVar[I, D, OL];
+            LAM = new double[I, D, OL];
             for (int i = 0; i < I; i++)
             {
                 for (int d = 0; d < D; d++)
@@ -84,22 +99,10 @@ namespace fesch.Services.Scheduler.ExamAttendants
                         fromIdx = time / 60; /// convert to instructor availability index from the above calculated 'time'
                         toIdx = (time + 50) / 60; /// current exam's finishing availability index
                         bool available = Attendants.Service.Availability[i, fromIdx] && Attendants.Service.Availability[i, toIdx];
-                        double mtxValue = available ? 1.0 : 0.0;
-                        LAM[i, d, ol] = model.AddVar(mtxValue, mtxValue, 0.0, GRB.BINARY, "LAM_" + i + "_" + d + "_" + ol);
+                        LAM[i, d, ol] = available ? 0.0 : 1.0;
                     }
                 }
             }
-        }
-
-        public static GRBQuadExpr MultiplyAt(GRBVar[,,] AM, GRBVar[]ordinal, int i, int d)
-        {
-            if (AM.GetLength(3) != ordinal.Length) throw new AttendantSchedulerException("Ordinal length mismatch!");
-            GRBQuadExpr product = 0;
-            for (int o = 0; o < ordinal.Length; o++)
-            {
-                product.Add(AM[i, d, o] * ordinal[o]);
-            }
-            return product;
         }
     }
 }

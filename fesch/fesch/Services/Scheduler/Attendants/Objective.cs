@@ -21,14 +21,11 @@ namespace fesch.Services.Scheduler.ExamAttendants
         {
             int penaltyScore = 10;
             GRBLinExpr penalty = 0;
-            for (int i = 0; i < I; i++)
+            for (int s = 0; s < S; s++)
             {
-                for (int d = 0; d < D; d++)
+                for (int me = 0; me < Variables.sme[s].Length; me++)
                 {
-                    for (int c = 0; c < C; c++)
-                    {
-                        penalty.AddTerm(1, Variables.iGRB[i, d, c]);
-                    }
+                    penalty.AddTerm(1, Variables.sme[s][me]);
                 }
             }
             return penaltyScore * penalty;
@@ -46,15 +43,15 @@ namespace fesch.Services.Scheduler.ExamAttendants
                     {
                         for(int me = 0; me < Variables.sme[s].Length; me++)
                         {
-                            /// calculate if instructor[i] is available at a given ordinal[s]
-                            GRBQuadExpr available = Variables.MultiplyAt(
-                                Attendants.Service.Students[s].Short ? Variables.SAM : Variables.LAM, 
+                            GRBVar temp = Variables.sme[s][me];
+                            GRBVar[] tempeki = Variables.sor[s];
+                            int temporary = Attendants.Service.SME[s][me].DataModelsId;
+                            temporary = Attendants.Service.Fragments[f].Day;
+                            penalty.Add(Variables.Unavailable(
+                                Variables.sme[s][me],
                                 Variables.sor[s],
                                 Attendants.Service.SME[s][me].DataModelsId,
-                                Attendants.Service.Fragments[f].Day);
-                            /// if student[s] instructor[me -> .Id] association exists, ergo sme[s][me] true
-                            /// add penalty if instructor[me -> .Id] is unavailable
-                            penalty.Add(Variables.sme[s][me] - available); //EZ ITT MÉG NEM JÓ, ÉDES ISTENEM, MIÉRT?!
+                                Attendants.Service.Fragments[f].Day));
                         }
                     }
                 }

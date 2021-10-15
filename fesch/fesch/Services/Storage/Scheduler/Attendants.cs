@@ -81,7 +81,7 @@ namespace fesch.Services.Storage.Scheduler
             List<Instructor> members = DataModels.Service.getInstructors().FindAll(i => i.Member);
             for (int s = 0; s < Students.Count; s++)
             {
-                Student student = DataModels.Service.getStudents()[s];
+                Student student = DataModels.Service.getStudent(s);
                 List<Instructor> examiners = DataModels.Service.getInstructors().FindAll(
                     i => Students[s].Short ? i.Courses.Contains(student.FirstCourse) : (i.Courses.Contains(student.FirstCourse) || i.Courses.Contains(student.SecondCourse)));
                 List<Instructor> meInstructors = new List<Instructor>();
