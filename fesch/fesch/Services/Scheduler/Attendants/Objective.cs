@@ -7,9 +7,7 @@ namespace fesch.Services.Scheduler.ExamAttendants
     {
         /// dimensions
         private static int S = Variables.S;
-        private static int I = Variables.I;
-        private static int D = Variables.D;
-        private static int C = Variables.C;
+        private static int F = Variables.F;
 
         public static void Set(GRBModel model)
         {
@@ -40,22 +38,23 @@ namespace fesch.Services.Scheduler.ExamAttendants
         {
             int penaltyScore = 1000;
             GRBQuadExpr penalty = 0;
-            for (int d = 0; d < D; d++)
+            for (int s = 0; s < S; s++)
             {
-                for (int c = 0; c < C; c++)
+                for (int f = 0; f < F; f++)
                 {
-                    for (int i = 0; i < I; i++)
+                    for (int o = 0; o < Variables.sor[s].Length; o++)
                     {
-                        for(int s = 0; s < S; s++)
+                        for(int me = 0; me < Variables.sme[s].Length; me++)
                         {
                             /// calculate if instructor[i] is available at a given ordinal[s]
-                            GRBQuadExpr available = (Attendants.Service.Students[s].Short) ?
-                                Variables.MultiplyAt(Variables.SAM, Variables.ordinal[s], i, d) :
-                                Variables.MultiplyAt(Variables.LAM, Variables.ordinal[s], i, d);
-                            /// both student[s] and instructor[i] are present on given 'd' day
-                            GRBQuadExpr matching = Variables.iGRB[i, d, c] * Variables.sGRB[s, d, c];
-                            /// penalty if they both need to be present, but instructor[i] is unavailable
-                            penalty.Add(matching - available);
+                            GRBQuadExpr available = Variables.MultiplyAt(
+                                Attendants.Service.Students[s].Short ? Variables.SAM : Variables.LAM, 
+                                Variables.sor[s],
+                                Attendants.Service.SME[s][me].DataModelsId,
+                                Attendants.Service.Fragments[f].Day);
+                            /// if student[s] instructor[me -> .Id] association exists, ergo sme[s][me] true
+                            /// add penalty if instructor[me -> .Id] is unavailable
+                            penalty.Add(Variables.sme[s][me] - available); //EZ ITT MÉG NEM JÓ, ÉDES ISTENEM, MIÉRT?!
                         }
                     }
                 }

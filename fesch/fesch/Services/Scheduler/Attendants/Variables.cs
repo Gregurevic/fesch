@@ -8,54 +8,48 @@ namespace fesch.Services.Scheduler.ExamAttendants
     {
         ///dimension
         public static int S = Attendants.Service.DimensionS;
-        public static int I = Attendants.Service.DimensionI;
-        public static int D = Attendants.Service.DimensionD;
-        public static int C = Attendants.Service.DimensionC;
+        public static int F = Attendants.Service.DimensionF;
         public static int OS = Attendants.Service.DimensionOS;
         public static int OL = Attendants.Service.DimensionOL;
         /// variables
-        public static GRBVar[,,] iGRB;
-        public static GRBVar[,,] sGRB;
-        public static GRBVar[][] ordinal;
+        public static GRBVar[,] sfx; /// Student-Fragment-matriX
+        public static GRBVar[][] sor; /// Student-ORdinal-matrix
+        public static GRBVar[][] sme; /// Student-(Member-or-Examiner)-matrix
         /// objective helper variables
         public static GRBVar[,,] SAM; /// short-exam (instructors')availability matrix
         public static GRBVar[,,] LAM; /// long-exam (instructors')availability matrix
         public static void Set(GRBModel model)
         {
             /// variables
-            iGRB = new GRBVar[I, D, C];
-            for (int i = 0; i < I; i++)
-            {
-                for (int d = 0; d < D; d++)
-                {
-                    for (int c = 0; c < C; c++)
-                    {
-                        iGRB[i, d, c] = model.AddVar(0.0, 1.0, 0.0, GRB.BINARY, "i_" + i + "_" + d + "_" + c);
-                    }
-                }
-            }
-            sGRB = new GRBVar[S, D, C];
+            sfx = new GRBVar[S, F];
             for (int s = 0; s < S; s++)
             {
-                for (int d = 0; d < D; d++)
+                for (int f = 0; f < F; f++)
                 {
-                    for (int c = 0; c < C; c++)
-                    {
-                        sGRB[s, d, c] = model.AddVar(0.0, 1.0, 0.0, GRB.BINARY, "s_" + s + "_" + d + "_" + c);
-                    }
+                    sfx[s, f] = model.AddVar(0.0, 1.0, 0.0, GRB.BINARY, "sfx_" + s + "_" + f);
                 }
             }
-            ordinal = new GRBVar[S][];
+            sor = new GRBVar[S][];
             for (int s = 0; s < S; s++)
             {
-                int length = Attendants.Service.Students[s].Short ? OS : OL;
-                ordinal[s] = new GRBVar[length];
-                for(int l = 0; l < length; l++)
+                sor[s] = new GRBVar[Attendants.Service.Students[s].Short ? OS : OL];
+                for (int o = 0; o < sor[s].Length; o++)
                 {
-                    ordinal[s][l] = model.AddVar(0.0, 1.0, 0.0, GRB.BINARY, "ordinal_" + s + "_" + l);
+                    sor[s][o] = model.AddVar(0.0, 1.0, 0.0, GRB.BINARY, "sor_" + s  + "_" + o);
+                }
+            }
+            sme = new GRBVar[S][];
+            for (int s = 0; s < S; s++)
+            {
+                sme[s] = new GRBVar[Attendants.Service.SME.Length];
+                for (int me = 0; me < sme[s].Length; me++)
+                {
+                    sme[s][me] = model.AddVar(0.0, 1.0, 0.0, GRB.BINARY, "sme_" + s + "_" + me);
                 }
             }
             /// objective helper variables
+            int I = Attendants.Service.GetI();
+            int D = Attendants.Service.GetD();
             SAM = new GRBVar[I, D, OS];
             int time;
             int fromIdx;
@@ -71,7 +65,7 @@ namespace fesch.Services.Scheduler.ExamAttendants
                         time += ((os + 1) / 6) * 50; /// add lunch duration (50) from 6th daily exam onward
                         fromIdx = time / 60; /// convert to instructor availability index from the above calculated 'time'
                         toIdx = (time + 40) / 60; /// current exam's finishing availability index
-                        bool available = Attendants.Service.Instructors[i].Availability[fromIdx] && Attendants.Service.Instructors[i].Availability[toIdx];
+                        bool available = Attendants.Service.Availability[i, fromIdx] && Attendants.Service.Availability[i, toIdx];
                         double mtxValue = available ? 1.0 : 0.0;
                         SAM[i, d, os] = model.AddVar(mtxValue, mtxValue, 0.0, GRB.BINARY, "SAM_" + i + "_" + d + "_" + os);
                     }
@@ -89,7 +83,7 @@ namespace fesch.Services.Scheduler.ExamAttendants
                         time += ((ol + 1) / 5) * 50; /// add lunch duration (50) from 5th daily exam onward
                         fromIdx = time / 60; /// convert to instructor availability index from the above calculated 'time'
                         toIdx = (time + 50) / 60; /// current exam's finishing availability index
-                        bool available = Attendants.Service.Instructors[i].Availability[fromIdx] && Attendants.Service.Instructors[i].Availability[toIdx];
+                        bool available = Attendants.Service.Availability[i, fromIdx] && Attendants.Service.Availability[i, toIdx];
                         double mtxValue = available ? 1.0 : 0.0;
                         LAM[i, d, ol] = model.AddVar(mtxValue, mtxValue, 0.0, GRB.BINARY, "LAM_" + i + "_" + d + "_" + ol);
                     }
