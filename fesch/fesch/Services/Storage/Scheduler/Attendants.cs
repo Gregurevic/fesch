@@ -94,7 +94,8 @@ namespace fesch.Services.Storage.Scheduler
                         s * meInstructors.Count + me,
                         meInstructors[me].Id,
                         meInstructors[me].Member,
-                        me >= members.Count
+                        meInstructors[me].Courses.Contains(Students[s].Courses[0]),
+                        !Students[s].Short && meInstructors[me].Courses.Contains(Students[s].Courses[1])
                     );
                 }
             }

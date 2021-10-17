@@ -124,6 +124,16 @@ namespace fesch.Services.Scheduler
                 Console.Write("\n");
             }
             for (int o = 0; o < ExamAttendants.Variables.OL; o++) { Console.Write(temp[o] + " "); }
+            Console.Write("\n");
+            Console.WriteLine("sme");
+            for (int s = 0; s < S; s++)
+            {
+                for (int me = 0; me < ExamAttendants.Variables.sme[s].Length; me++)
+                {
+                    Console.Write(ExamAttendants.Variables.sme[s][me].X);
+                }
+                Console.Write("\n");
+            }
         }
     }
 }

@@ -12,7 +12,7 @@ namespace fesch.Services.Scheduler.ExamAttendants
         {
             model.SetObjective(
                 InstructorCount() +
-                InstructorAvailability(), 
+                InstructorUnavailability(),
                 GRB.MINIMIZE);
         }
 
@@ -30,7 +30,7 @@ namespace fesch.Services.Scheduler.ExamAttendants
             return penaltyScore * penalty;
         }
 
-        private static GRBQuadExpr InstructorAvailability()
+        private static GRBQuadExpr InstructorUnavailability()
         {
             int penaltyScore = 1000;
             GRBQuadExpr penalty = 0;
@@ -42,10 +42,6 @@ namespace fesch.Services.Scheduler.ExamAttendants
                     {
                         for(int me = 0; me < Variables.sme[s].Length; me++)
                         {
-                            GRBVar temp = Variables.sme[s][me];
-                            GRBVar[] tempeki = Variables.sor[s];
-                            int temporary = Attendants.Service.SME[s][me].DataModelsId;
-                            temporary = Attendants.Service.Fragments[f].Day;
                             penalty.Add(Variables.Unavailable(
                                 Variables.sme[s][me],
                                 Variables.sor[s],

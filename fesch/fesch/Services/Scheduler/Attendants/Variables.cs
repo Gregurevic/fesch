@@ -62,6 +62,7 @@ namespace fesch.Services.Scheduler.ExamAttendants
         /// CONSTRAINT VARIABLES
         public static GRBVar[] _constraint_sfx_s_count_S;
         public static GRBVar[] _constraint_sfx_s_count_L;
+        public static GRBVar[] _constraint_no_duplicate_ordinals;
 
         private static void InitConstraintVariables(GRBModel model)
         {
@@ -74,6 +75,18 @@ namespace fesch.Services.Scheduler.ExamAttendants
             for (int f = 0; f < F; f++)
             {
                 _constraint_sfx_s_count_L[f] = model.AddVar(0.0, 1.0, 0.0, GRB.BINARY, "_constraint_sfx_s_count_L_" + f);
+            }
+            _constraint_no_duplicate_ordinals = new GRBVar[S * OS * F];
+            for (int f = 0; f < F; f++)
+            {
+                for (int o = 0; o < OS; o++)
+                {
+                    for (int s = 0; s < S; s++)
+                    {
+                        _constraint_no_duplicate_ordinals[f * OS * S + o * S + s] 
+                            = model.AddVar(0.0, 1.0, 0.0, GRB.BINARY, "_constraint_no_duplicate_ordinals_" + f + "_" + o + "_" + "_" + s);
+                    }
+                }
             }
         }
 
