@@ -11,12 +11,26 @@ namespace fesch.Services.Scheduler.ExamAttendants
         public static int OS = Attendants.Service.DimensionOS;
         public static int OL = Attendants.Service.DimensionOL;
         /// variables
-        public static GRBVar[,] sfx; /// student-Fragment-matriX
-        public static GRBVar[][] sor; /// student-ORDinal-matrix
-        public static GRBVar[][] sme; /// Student-Instructor(member-or-examiner)-Matrix
+        public static GRBVar[,] sfx;
+        public static GRBVar[][] sor;
+        public static GRBVar[][] sme;
+        
         public static void Set(GRBModel model)
         {
             /// variables
+            InitVariables(model);
+            /// constraint variables
+            InitConstraintVariables(model);
+            /// objective variables
+            InitUnavailabilityMatrix();
+        }
+
+        /// VARIABLES
+        /// sfx ~ Student-Fragment-matriX
+        /// sor ~ Student-ORDinal-matrix
+        /// sme ~ Student-(Member-or-Examiner)-matrix
+        private static void InitVariables(GRBModel model)
+        {
             sfx = new GRBVar[S, F];
             for (int s = 0; s < S; s++)
             {
@@ -31,7 +45,7 @@ namespace fesch.Services.Scheduler.ExamAttendants
                 sor[s] = new GRBVar[Attendants.Service.Students[s].Short ? OS : OL];
                 for (int o = 0; o < sor[s].Length; o++)
                 {
-                    sor[s][o] = model.AddVar(0.0, 1.0, 0.0, GRB.BINARY, "sor_" + s  + "_" + o);
+                    sor[s][o] = model.AddVar(0.0, 1.0, 0.0, GRB.BINARY, "sor_" + s + "_" + o);
                 }
             }
             sme = new GRBVar[S][];
@@ -43,24 +57,29 @@ namespace fesch.Services.Scheduler.ExamAttendants
                     sme[s][me] = model.AddVar(0.0, 1.0, 0.0, GRB.BINARY, "sme_" + s + "_" + me);
                 }
             }
-            /// objective helper variables
-            InitUnavailabilityMatrix();
         }
 
-        /// UNAVAILABILITY MATRICES
+        /// CONSTRAINT VARIABLES
+        public static GRBVar[] _constraint_sfx_s_count_S;
+        public static GRBVar[] _constraint_sfx_s_count_L;
+
+        private static void InitConstraintVariables(GRBModel model)
+        {
+            _constraint_sfx_s_count_S = new GRBVar[F];
+            _constraint_sfx_s_count_L = new GRBVar[F];
+            for (int f = 0; f < F; f++)
+            {
+                _constraint_sfx_s_count_S[f] = model.AddVar(0.0, 1.0, 0.0, GRB.BINARY, "_constraint_sfx_s_count_S_" + f);
+            }
+            for (int f = 0; f < F; f++)
+            {
+                _constraint_sfx_s_count_L[f] = model.AddVar(0.0, 1.0, 0.0, GRB.BINARY, "_constraint_sfx_s_count_L_" + f);
+            }
+        }
+
+        /// OBJECTIVE VARIABLES - UNAVAILABILITY MATRICES
         private static double[,,] SAM;
         private static double[,,] LAM;
-
-        public static GRBQuadExpr Unavailable(GRBVar match, GRBVar[]ordinal, int i, int d)
-        {
-            double[,,] AM = (ordinal.Length == OS) ? SAM : LAM;
-            GRBQuadExpr product = 0;
-            for (int o = 0; o < ordinal.Length; o++)
-            {
-                product.Add(AM[i, d, o] * match * ordinal[o]);
-            }
-            return product;
-        }
 
         private static void InitUnavailabilityMatrix()
         {
@@ -103,6 +122,17 @@ namespace fesch.Services.Scheduler.ExamAttendants
                     }
                 }
             }
+        }
+
+        public static GRBQuadExpr Unavailable(GRBVar match, GRBVar[] ordinal, int i, int d)
+        {
+            double[,,] AM = (ordinal.Length == OS) ? SAM : LAM;
+            GRBQuadExpr product = 0;
+            for (int o = 0; o < ordinal.Length; o++)
+            {
+                product.Add(AM[i, d, o] * match * ordinal[o]);
+            }
+            return product;
         }
     }
 }

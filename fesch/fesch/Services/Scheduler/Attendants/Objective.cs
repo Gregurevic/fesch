@@ -5,7 +5,6 @@ namespace fesch.Services.Scheduler.ExamAttendants
 {
     static class Objective
     {
-        /// dimensions
         private static int S = Variables.S;
         private static int F = Variables.F;
 

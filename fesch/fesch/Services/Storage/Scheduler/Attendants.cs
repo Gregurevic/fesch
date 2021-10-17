@@ -53,7 +53,7 @@ namespace fesch.Services.Storage.Scheduler
                     courses
                 ));
             }
-            /// Fargments
+            /// Fragments
             int idx = 0;
             foreach (StructureFragment sf in Structures.Service.Fragments)
             {
