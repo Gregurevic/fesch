@@ -14,6 +14,7 @@ namespace fesch.Services.Scheduler.ExamAttendants
         {
             /// objective constraints
             MELoads(model);
+            LanguageBlocks(model);
             /// regular constraints
             sfx_StudentCount(model);
             sfx_EveryStudentIsPresent(model);
@@ -24,6 +25,7 @@ namespace fesch.Services.Scheduler.ExamAttendants
             sme_MEPresence(model);
         }
 
+        /// objective constraints
         private static void MELoads(GRBModel model)
         {
             GRBLinExpr[] sums = new GRBLinExpr[Attendants.Service.SMEFlattenedLength];
@@ -39,10 +41,36 @@ namespace fesch.Services.Scheduler.ExamAttendants
             }
             for (int fl = 0; fl < Attendants.Service.SMEFlattenedLength; fl++)
             {
-                model.AddConstr(Variables._objective_ME_PositiveDeviation[fl] - Variables._objective_ME_NegativeDeviation[fl] == sum - sums[fl], "MELoads_" + fl);
+                model.AddConstr(
+                    Variables._objective_ME_PositiveDeviation[fl] - Variables._objective_ME_NegativeDeviation[fl] == sum - sums[fl], 
+                    "MELoads_" + fl);
             }
         }
 
+        private static void LanguageBlocks(GRBModel model)
+        {
+            for (int f = 0; f < F; f++)
+            {
+                GRBLinExpr sum = 0;
+                for (int s = 0; s < S; s++)
+                {
+                    sum.AddTerm(
+                        Attendants.Service.Students[s].English ? 1.0 : 0.0,
+                        Variables.sfx[s, f]);
+                }
+                /// if an English student exists in Fragment, set indicator to true
+                /// [later]: minimize indicator count
+                /// hence
+                /// create language blocks
+                model.AddGenConstrIndicator(
+                    Variables._objective_LanguageBlock[f], 
+                    1, 
+                    sum >= 1,
+                    "LanguageBlocks_" + f);
+            }
+        }
+
+        /// regular constraints
         private static void sfx_StudentCount(GRBModel model)
         {
             GRBLinExpr[] sumsS = new GRBLinExpr[F];

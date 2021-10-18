@@ -7,13 +7,16 @@ namespace fesch.Services.Scheduler.ExamAttendants
     {
         private static int S = Variables.S;
         private static int F = Variables.F;
+        private static int OS = Variables.OS;
+        private static int OL = Variables.OL;
 
         public static void Set(GRBModel model)
         {
             model.SetObjective(
                 InstructorCount() +
                 InstructorUnavailability() +
-                MELoads(),
+                MELoads() + 
+                LanguageBlocks(),
                 GRB.MINIMIZE);
         }
 
@@ -33,7 +36,7 @@ namespace fesch.Services.Scheduler.ExamAttendants
 
         private static GRBQuadExpr InstructorUnavailability()
         {
-            int penaltyScore = 1000;
+            int penaltyScore = 100;
             GRBQuadExpr penalty = 0;
             for (int s = 0; s < S; s++)
             {
@@ -64,12 +67,18 @@ namespace fesch.Services.Scheduler.ExamAttendants
                 penalty.AddTerm(1.0 / (30 * S), Variables._objective_ME_PositiveDeviation[fl]);
                 penalty.AddTerm(1.0 / (30 * S), Variables._objective_ME_NegativeDeviation[fl]);
             }
-            return penalty * penaltyScore;
+            return penaltyScore * penalty;
         }
 
-        private static GRBLinExpr StudentsOutOfBlock()
+        private static GRBLinExpr LanguageBlocks()
         {
-
+            int penaltyScore = 1;
+            GRBLinExpr penalty = 0;
+            for (int f = 0; f < F; f++)
+            {
+                penalty.AddTerm(1, Variables._objective_LanguageBlock[f]);
+            }
+            return penaltyScore * penalty;
         }
     }
 }

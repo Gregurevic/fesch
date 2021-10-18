@@ -8,17 +8,17 @@ namespace fesch.Services.Storage.Scheduler.AttendantsModel
     {
         public int Id { get; set; }
         public Level Level { get; set; }
-        public Language Language { get; set; }
+        public bool English { get; set; }
         public Tution Tution { get; set; }
         public bool Short { get; set; }
         public int SupervisorId { get; set; }
         public List<CourseNeptun> Courses { get; set; }
         private AttendantStudent() { }
-        public AttendantStudent(int id, Level level, Language language, Tution tution, bool @short, int supervisorId, List<CourseNeptun> courses)
+        public AttendantStudent(int id, Level level, bool english, Tution tution, bool @short, int supervisorId, List<CourseNeptun> courses)
         {
             Id = id;
             Level = level;
-            Language = language;
+            English = english;
             Tution = tution;
             Short = @short;
             SupervisorId = supervisorId;

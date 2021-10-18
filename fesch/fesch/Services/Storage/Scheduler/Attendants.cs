@@ -48,7 +48,7 @@ namespace fesch.Services.Storage.Scheduler
                 Students.Add(new AttendantStudent(
                     s.Id,
                     s.Level,
-                    s.Language,
+                    s.Language == Language.ENG,
                     s.Tution != Tution.BPRO ? s.Tution : Tution.INFO,
                     shortExam,
                     DataModels.Service.getInstructors().Find(i => i.Neptun.Match(s.Supervisor)).Id,
