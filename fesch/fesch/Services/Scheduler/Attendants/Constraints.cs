@@ -15,6 +15,7 @@ namespace fesch.Services.Scheduler.ExamAttendants
             /// objective constraints
             MELoads(model);
             LanguageBlocks(model);
+            TutionBlocks(model);
             /// regular constraints
             sfx_StudentCount(model);
             sfx_EveryStudentIsPresent(model);
@@ -67,6 +68,29 @@ namespace fesch.Services.Scheduler.ExamAttendants
                     1, 
                     sum >= 1,
                     "LanguageBlocks_" + f);
+            }
+        }
+
+        private static void TutionBlocks(GRBModel model)
+        {
+            for (int f = 0; f < F; f++)
+            {
+                GRBLinExpr sum = 0;
+                for (int s = 0; s < S; s++)
+                {
+                    sum.AddTerm(
+                        Attendants.Service.Students[s].BPRO ? 1.0 : 0.0,
+                        Variables.sfx[s, f]);
+                }
+                /// if an English student exists in Fragment, set indicator to true
+                /// [later]: minimize indicator count
+                /// hence
+                /// create language blocks
+                model.AddGenConstrIndicator(
+                    Variables._objective_TutionBlock[f],
+                    1,
+                    sum >= 1,
+                    "TutionBlocks_" + f);
             }
         }
 

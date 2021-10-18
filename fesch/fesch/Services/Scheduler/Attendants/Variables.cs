@@ -18,6 +18,7 @@ namespace fesch.Services.Scheduler.ExamAttendants
         public static GRBVar[] _objective_ME_PositiveDeviation;
         public static GRBVar[] _objective_ME_NegativeDeviation;
         public static GRBVar[] _objective_LanguageBlock;
+        public static GRBVar[] _objective_TutionBlock;
 
         public static void Set(GRBModel model)
         {
@@ -96,7 +97,8 @@ namespace fesch.Services.Scheduler.ExamAttendants
         }
 
         /// OBJECTIVE VARIABLES - ME_DEVIATION
-        /// OBJECTIVE VARIABLES - ENG_DEVIATION
+        /// OBJECTIVE VARIABLES - LANGUAGE_BLOCKS
+        /// OBJECTIVE VARIABLES - TUTION_BLOCKS
         private static void InitObjectiveVariables(GRBModel model)
         {
             _objective_ME_PositiveDeviation = new GRBVar[Attendants.Service.SMEFlattenedLength];
@@ -113,6 +115,11 @@ namespace fesch.Services.Scheduler.ExamAttendants
             for (int f = 0; f < F; f++)
             {
                 _objective_LanguageBlock[f] = model.AddVar(0.0, GRB.INFINITY, 0.0, GRB.INTEGER, "_objective_LanguageBlock_" + f);
+            }
+            _objective_TutionBlock = new GRBVar[F];
+            for (int f = 0; f < F; f++)
+            {
+                _objective_TutionBlock[f] = model.AddVar(0.0, GRB.INFINITY, 0.0, GRB.INTEGER, "_objective_TutionBlock_" + f);
             }
         }
 

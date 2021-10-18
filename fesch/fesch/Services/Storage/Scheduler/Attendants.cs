@@ -50,6 +50,7 @@ namespace fesch.Services.Storage.Scheduler
                     s.Level,
                     s.Language == Language.ENG,
                     s.Tution != Tution.BPRO ? s.Tution : Tution.INFO,
+                    s.Tution == Tution.BPRO,
                     shortExam,
                     DataModels.Service.getInstructors().Find(i => i.Neptun.Match(s.Supervisor)).Id,
                     courses

@@ -16,7 +16,8 @@ namespace fesch.Services.Scheduler.ExamAttendants
                 InstructorCount() +
                 InstructorUnavailability() +
                 MELoads() + 
-                LanguageBlocks(),
+                LanguageBlocks() +
+                TutionBlocks(),
                 GRB.MINIMIZE);
         }
 
@@ -77,6 +78,17 @@ namespace fesch.Services.Scheduler.ExamAttendants
             for (int f = 0; f < F; f++)
             {
                 penalty.AddTerm(1, Variables._objective_LanguageBlock[f]);
+            }
+            return penaltyScore * penalty;
+        }
+
+        private static GRBLinExpr TutionBlocks()
+        {
+            int penaltyScore = 1;
+            GRBLinExpr penalty = 0;
+            for (int f = 0; f < F; f++)
+            {
+                penalty.AddTerm(1, Variables._objective_TutionBlock[f]);
             }
             return penaltyScore * penalty;
         }
