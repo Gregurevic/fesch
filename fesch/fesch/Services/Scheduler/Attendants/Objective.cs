@@ -12,7 +12,8 @@ namespace fesch.Services.Scheduler.ExamAttendants
         {
             model.SetObjective(
                 InstructorCount() +
-                InstructorUnavailability(),
+                InstructorUnavailability() +
+                MELoads(),
                 GRB.MINIMIZE);
         }
 
@@ -52,6 +53,23 @@ namespace fesch.Services.Scheduler.ExamAttendants
                 }
             }
             return penaltyScore * penalty;
+        }
+
+        private static GRBLinExpr MELoads()
+        {
+            int penaltyScore = 10;
+            GRBLinExpr penalty = 0;
+            for (int fl = 0; fl < Attendants.Service.SMEFlattenedLength; fl++)
+            {
+                penalty.AddTerm(1.0 / (30 * S), Variables._objective_ME_PositiveDeviation[fl]);
+                penalty.AddTerm(1.0 / (30 * S), Variables._objective_ME_NegativeDeviation[fl]);
+            }
+            return penalty * penaltyScore;
+        }
+
+        private static GRBLinExpr StudentsOutOfBlock()
+        {
+
         }
     }
 }

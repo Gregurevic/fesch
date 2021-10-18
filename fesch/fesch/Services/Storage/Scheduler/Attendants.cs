@@ -4,6 +4,7 @@ using fesch.Services.Storage.DataModel;
 using fesch.Services.Storage.Scheduler.AttendantsModel;
 using fesch.Services.Storage.Scheduler.StructureModel;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace fesch.Services.Storage.Scheduler
 {
@@ -27,8 +28,9 @@ namespace fesch.Services.Storage.Scheduler
         public AttendantInstructor[][] SME { get; set; }
         public int DimensionF { get; set; }
         public int DimensionS { get; set; }
-        public int DimensionOS { get; set; } /// ordinal short
-        public int DimensionOL { get; set; } /// ordinal long
+        public int DimensionOS { get; set; } /// ordinal short dimension
+        public int DimensionOL { get; set; } /// ordinal long dimension
+        public int SMEFlattenedLength { get; set; }
         private Attendants()
         {
             /// init attributes
@@ -47,7 +49,7 @@ namespace fesch.Services.Storage.Scheduler
                     s.Id,
                     s.Level,
                     s.Language,
-                    s.Tution,
+                    s.Tution != Tution.BPRO ? s.Tution : Tution.INFO,
                     shortExam,
                     DataModels.Service.getInstructors().Find(i => i.Neptun.Match(s.Supervisor)).Id,
                     courses
@@ -57,13 +59,17 @@ namespace fesch.Services.Storage.Scheduler
             int idx = 0;
             foreach (StructureFragment sf in Structures.Service.Fragments)
             {
+                List<CourseNeptun> courses = new List<CourseNeptun>();
+                courses.AddRange(DataModels.Service.getInstructor(sf.PresidentId).Courses);
+                courses.AddRange(DataModels.Service.getInstructor(sf.SecretaryId).Courses);
                 Fragments.Add(new AttendantFragment(
                     idx,
                     sf.Tution,
                     sf.DayIndex,
                     sf.ChamberIndex,
                     sf.PresidentId,
-                    sf.SecretaryId
+                    sf.SecretaryId,
+                    courses.Distinct().ToList()
                 ));
                 idx++;
             }
@@ -87,6 +93,7 @@ namespace fesch.Services.Storage.Scheduler
                 List<Instructor> meInstructors = new List<Instructor>();
                 meInstructors.AddRange(members);
                 meInstructors.AddRange(examiners);
+                meInstructors = meInstructors.Distinct().ToList();
                 SME[s] = new AttendantInstructor[meInstructors.Count];
                 for (int me = 0; me < meInstructors.Count; me++)
                 {
@@ -97,6 +104,24 @@ namespace fesch.Services.Storage.Scheduler
                         meInstructors[me].Courses.Contains(Students[s].Courses[0]),
                         !Students[s].Short && meInstructors[me].Courses.Contains(Students[s].Courses[1])
                     );
+                }
+            }
+            /// SME's FlattenedLength
+            List<int> DataModelIds = new List<int>();
+            for (int s = 0; s < Students.Count; s++)
+            {
+                for (int me = 0; me < SME[s].Length; me++)
+                {
+                    if (!DataModelIds.Contains(SME[s][me].DataModelsId)) DataModelIds.Add(SME[s][me].DataModelsId);
+                }
+            }
+            SMEFlattenedLength = DataModelIds.Count;
+            /// SME's flattened id
+            for (int s = 0; s < Students.Count; s++)
+            {
+                for (int me = 0; me < SME[s].Length; me++)
+                {
+                    SME[s][me].FlattenedId = DataModelIds.IndexOf(SME[s][me].DataModelsId);
                 }
             }
             /// Dimensions

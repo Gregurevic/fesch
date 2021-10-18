@@ -14,7 +14,10 @@ namespace fesch.Services.Scheduler.ExamAttendants
         public static GRBVar[,] sfx;
         public static GRBVar[][] sor;
         public static GRBVar[][] sme;
-        
+        /// objective variables 
+        public static GRBVar[] _objective_ME_PositiveDeviation;
+        public static GRBVar[] _objective_ME_NegativeDeviation;
+
         public static void Set(GRBModel model)
         {
             /// variables
@@ -22,6 +25,7 @@ namespace fesch.Services.Scheduler.ExamAttendants
             /// constraint variables
             InitConstraintVariables(model);
             /// objective variables
+            InitObjectiveVariables(model);
             InitUnavailabilityMatrix();
         }
 
@@ -87,6 +91,21 @@ namespace fesch.Services.Scheduler.ExamAttendants
                             = model.AddVar(0.0, 1.0, 0.0, GRB.BINARY, "_constraint_no_duplicate_ordinals_" + f + "_" + o + "_" + "_" + s);
                     }
                 }
+            }
+        }
+
+        /// OBJECTIVE VARIABLES - ME_DEVIATION
+        private static void InitObjectiveVariables(GRBModel model)
+        {
+            _objective_ME_PositiveDeviation = new GRBVar[Attendants.Service.SMEFlattenedLength];
+            _objective_ME_NegativeDeviation = new GRBVar[Attendants.Service.SMEFlattenedLength];
+            for (int fl = 0; fl < Attendants.Service.SMEFlattenedLength; fl++)
+            {
+                _objective_ME_PositiveDeviation[fl] = model.AddVar(0.0, GRB.INFINITY, 0.0, GRB.INTEGER, "_objective_ME_PositiveDeviation_" + fl);
+            }
+            for (int fl = 0; fl < Attendants.Service.SMEFlattenedLength; fl++)
+            {
+                _objective_ME_NegativeDeviation[fl] = model.AddVar(0.0, GRB.INFINITY, 0.0, GRB.INTEGER, "_objective_ME_NegativeDeviation_" + fl);
             }
         }
 

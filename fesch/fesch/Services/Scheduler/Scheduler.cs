@@ -97,6 +97,8 @@ namespace fesch.Services.Scheduler
         //}
         //Console.WriteLine(temp.Value);
 
+        /// Visualizer for ScheduleExamAttendants
+        /// Can be used after the model.Optimize() call
         private static void VisualizeAttendants()
         {
             int S = ExamAttendants.Variables.S;

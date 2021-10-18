@@ -12,14 +12,38 @@ namespace fesch.Services.Scheduler.ExamAttendants
 
         public static void Set(GRBModel model)
         {
-            sfx_studentCount(model);
-            sfx_everyStudentIsPresent(model);
+            /// objective constraints
+            MELoads(model);
+            /// regular constraints
+            sfx_StudentCount(model);
+            sfx_EveryStudentIsPresent(model);
+            sfx_MatchingTutions(model);
             sor_OneTrueOrdinal(model);
             sor_NoDuplicateOrdinals(model);
             sor_PreferLesserOrdinals(model);
+            sme_MEPresence(model);
         }
 
-        private static void sfx_studentCount(GRBModel model)
+        private static void MELoads(GRBModel model)
+        {
+            GRBLinExpr[] sums = new GRBLinExpr[Attendants.Service.SMEFlattenedLength];
+            GRBLinExpr sum = 0;
+            for (int fl = 0; fl < Attendants.Service.SMEFlattenedLength; fl++) { sums[fl] = 0; }
+            for (int s = 0; s < S; s++)
+            {
+                for (int me = 0; me < Variables.sme[s].Length; me++)
+                {
+                    sums[Attendants.Service.SME[s][me].FlattenedId].AddTerm(1, Variables.sme[s][me]);
+                    sum.AddTerm(1, Variables.sme[s][me]);
+                }
+            }
+            for (int fl = 0; fl < Attendants.Service.SMEFlattenedLength; fl++)
+            {
+                model.AddConstr(Variables._objective_ME_PositiveDeviation[fl] - Variables._objective_ME_NegativeDeviation[fl] == sum - sums[fl], "MELoads_" + fl);
+            }
+        }
+
+        private static void sfx_StudentCount(GRBModel model)
         {
             GRBLinExpr[] sumsS = new GRBLinExpr[F];
             GRBLinExpr[] sumsL = new GRBLinExpr[F];
@@ -35,13 +59,13 @@ namespace fesch.Services.Scheduler.ExamAttendants
                         sumsL[f].AddTerm(1, Variables.sfx[s, f]);
                     }
                 }
-                model.AddConstr(sumsS[f] <= 11 * Variables._constraint_sfx_s_count_S[f], "sfx_studentCount_S_" + f);
-                model.AddConstr(sumsL[f] <= 9 * Variables._constraint_sfx_s_count_L[f], "sfx_studentCount_L_" + f);
-                model.AddConstr(Variables._constraint_sfx_s_count_S[f] + Variables._constraint_sfx_s_count_L[f] == 1, "sfx_studentCount_H_" + f);
+                model.AddConstr(sumsS[f] <= 11 * Variables._constraint_sfx_s_count_S[f], "sfx_StudentCount_S_" + f);
+                model.AddConstr(sumsL[f] <= 9 * Variables._constraint_sfx_s_count_L[f], "sfx_StudentCount_L_" + f);
+                model.AddConstr(Variables._constraint_sfx_s_count_S[f] + Variables._constraint_sfx_s_count_L[f] == 1, "sfx_StudentCount_H_" + f);
             }
         }
 
-        private static void sfx_everyStudentIsPresent(GRBModel model)
+        private static void sfx_EveryStudentIsPresent(GRBModel model)
         {
             GRBLinExpr[] sums = new GRBLinExpr[S];
             for (int s = 0; s < S; s++)
@@ -51,7 +75,19 @@ namespace fesch.Services.Scheduler.ExamAttendants
                 {
                     sums[s].AddTerm(1, Variables.sfx[s, f]);
                 }
-                model.AddConstr(sums[s] == 1, "sfx_everyStudentIsPresent_" + s);
+                model.AddConstr(sums[s] == 1, "sfx_EveryStudentIsPresent_" + s);
+            }
+        }
+
+        private static void sfx_MatchingTutions(GRBModel model)
+        {
+            for (int s = 0; s < S; s++)
+            {
+                for (int f = 0; f < F; f++)
+                {
+                    if (Attendants.Service.Students[s].Tution != Attendants.Service.Fragments[f].Tution)
+                        model.AddConstr(Variables.sfx[s, f] == 0, "sfx_MatchingTutions_" + s + "_" + f);
+                }
             }
         }
 
@@ -119,14 +155,22 @@ namespace fesch.Services.Scheduler.ExamAttendants
 
         private static void sme_MEPresence(GRBModel model)
         {
+            /// ME instructors who can be Member(M), First Examiner (EF) or Secondary Examiner (ES)
             GRBLinExpr[] sumsM = new GRBLinExpr[S];
             GRBLinExpr[] sumsEF = new GRBLinExpr[S];
             GRBLinExpr[] sumsES = new GRBLinExpr[S];
+            /// president or secretary can be examiner in given Fragment
+            GRBLinExpr[] _Structure_is_EF = new GRBLinExpr[S];
+            GRBLinExpr[] _Structure_is_ES = new GRBLinExpr[S];
             for (int s = 0; s < S; s++)
             {
+                /// init local expressions
                 sumsM[s] = 0;
                 sumsEF[s] = 0;
                 sumsES[s] = 0;
+                _Structure_is_EF[s] = 0;
+                _Structure_is_ES[s] = 0;
+                /// fill expressions with correlating data
                 for (int me = 0; me < Variables.sme[s].Length; me++)
                 {
                     if (Attendants.Service.SME[s][me].Member)
@@ -142,9 +186,30 @@ namespace fesch.Services.Scheduler.ExamAttendants
                         sumsES[s].AddTerm(1, Variables.sme[s][me]);
                     }
                 }
-                model.AddConstr(sumsM[s] >= 1, "sme_MEPresence_M_" + s); /// deduct president and secretary
-                model.AddConstr(sumsEF[s] >= 1, "sme_MEPresence_EF_" + s); ///e
-                model.AddConstr(sumsES[s] >= 1, "sme_MEPresence_ES_" + s);///vrywhere
+                /// CONSTRAINTS
+                /// Member
+                model.AddConstr(sumsM[s] >= 1, "sme_MEPresence_M_" + s);
+                /// First Examiner
+                for (int f = 0; f < F; f++)
+                {
+                    _Structure_is_EF[s].AddTerm(
+                        Attendants.Service.Fragments[f].Courses.Contains(Attendants.Service.Students[s].Courses[0]) ? 1.0 : 0.0, 
+                        Variables.sfx[s, f]
+                    );
+                }
+                model.AddConstr(sumsEF[s] >= 1 - _Structure_is_EF[s], "sme_MEPresence_EF_" + s);
+                /// Second Examiner
+                if (!Attendants.Service.Students[s].Short)
+                {
+                    for (int f = 0; f < F; f++)
+                    {
+                        _Structure_is_ES[s].AddTerm(
+                            Attendants.Service.Fragments[f].Courses.Contains(Attendants.Service.Students[s].Courses[1]) ? 1.0 : 0.0, 
+                            Variables.sfx[s, f]
+                        );
+                    }
+                    model.AddConstr(sumsES[s] >= 1 - _Structure_is_ES[s], "sme_MEPresence_ES_" + s);
+                }
             }
         }
     }
