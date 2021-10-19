@@ -65,7 +65,7 @@ namespace fesch.Services.Scheduler.ExamAttendants
                                 Attendants.Service.Finalexams[f, o] = new AttedantsFinalexam(
                                     f * OS + o, 
                                     summary, 
-                                    "_" + (o + 1).ToString(),
+                                    (o + 1).ToString() + ".",
                                     (time / 60).ToString() + ":" + (time % 60).ToString(),
                                     DataModels.Service.getStudents()[s].Name,
                                     DataModels.Service.getStudents()[s].Neptun.ToString(), 
@@ -89,7 +89,7 @@ namespace fesch.Services.Scheduler.ExamAttendants
                         Attendants.Service.Finalexams[f, o] = new AttedantsFinalexam(
                             f * OS + o, 
                             summary,
-                            "_" + (o + 1).ToString(), 
+                            (o + 1).ToString() + ".", 
                             "", "", "", "", "", "", "", "", "", "", "", ""
                         );
                     }

@@ -2,6 +2,7 @@
 using fesch.Services.Storage.Result;
 using OfficeOpenXml;
 using OfficeOpenXml.Style;
+using System.Drawing;
 using System.IO;
 
 namespace fesch.Services.IO.Helper
@@ -61,17 +62,23 @@ namespace fesch.Services.IO.Helper
             /// borders
             for (int c = 1; c <= fe.Dimension.End.Column; c++)
             {
-                for (int r = 2; r < fe.Dimension.End.Row; r++)
+                for (int r = 2; r <= fe.Dimension.End.Row; r++)
                 {
                     if (r % 11 == 1)
                     {
                         fe.Cells[r, c].Style.Border.Bottom.Style = ExcelBorderStyle.Medium;
                     }
+                    else
+                    {
+                        fe.Cells[r, c].Style.Border.Bottom.Style = ExcelBorderStyle.Thin;
+                    }
+                    fe.Cells[r, c].Style.Border.Left.Style = ExcelBorderStyle.Thin;
+                    fe.Cells[r, c].Style.Border.Right.Style = ExcelBorderStyle.Thin;
                 }
             }
 
             /// merge cells
-            int[] merge_columns = new int[] { 1, 11, 12, 14 };
+            int[] merge_columns = new int[] { 1, 11, 12, 13, 14 };
             for (int mc = 0; mc < merge_columns.Length; mc++)
             {
                 int c = merge_columns[mc];
@@ -80,9 +87,7 @@ namespace fesch.Services.IO.Helper
                 bool merge = false;
                 for (int r = 2; r <= fe.Dimension.End.Row; r++)
                 {
-                    string val_f = fe.Cells[(r - 1), c].Value == null || fe.Cells[(r - 1), c].Value.ToString() == "" ? null : fe.Cells[(r - 1), c].Value.ToString();
-                    string val_s = fe.Cells[r      , c].Value == null || fe.Cells[r      , c].Value.ToString() == "" ? null : fe.Cells[r      , c].Value.ToString();
-                    if (val_f != null && val_s != null && val_f == val_s && r != fe.Dimension.End.Row - 1)
+                    if (fe.Cells[(r - 1), c].Value.ToString().Equals(fe.Cells[r, c].Value.ToString()) && r != fe.Dimension.End.Row && (r % 11 != 2 && r != 2))
                     {
                         if (merge)
                         {
@@ -97,6 +102,7 @@ namespace fesch.Services.IO.Helper
                     }
                     else
                     {
+                        if (r == fe.Dimension.End.Row) merge_r_finish++;
                         if (merge)
                         {
                             fe.Cells[merge_r_start, c, merge_r_finish, c].Merge = true;
@@ -108,8 +114,36 @@ namespace fesch.Services.IO.Helper
                 }
             }
 
+            /// align data center
+            for (int c = 1; c <= fe.Dimension.End.Column; c++)
+            {
+                for (int r = 1; r <= fe.Dimension.End.Row; r++)
+                {
+                    fe.Cells[r, c].Style.HorizontalAlignment = ExcelHorizontalAlignment.Center;
+                    fe.Cells[r, c].Style.VerticalAlignment = ExcelVerticalAlignment.Center;
+                }
+            }
+
+            /// colours
+            bool fill = false;
+            for (int c = 1; c <= fe.Dimension.End.Column; c++)
+            {
+                for (int r = 2; r < fe.Dimension.End.Row; r++)
+                {
+                    if (fill)
+                    {
+                        fe.Cells[r, c].Style.Fill.PatternType = ExcelFillStyle.Solid;
+                        fe.Cells[r, c].Style.Fill.BackgroundColor.SetColor(ColorTranslator.FromHtml("#CCFFCC"));
+                    }
+                    if (r % 11 == 1)
+                    {
+                        fill = !fill;
+                    }
+                }
+            }
+
             /// auto-fit
-            fe.Cells.AutoFitColumns();
+            fe.Cells[fe.Dimension.Address].AutoFitColumns();
 
             /// save and export
             FileInfo excelFile = new FileInfo(destination);
