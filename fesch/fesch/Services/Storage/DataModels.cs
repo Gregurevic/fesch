@@ -33,5 +33,9 @@ namespace fesch.Services.Storage
             Instructors = new List<Instructor>();
             Students = new List<Student>();
         }
+        public void Validate()
+        {
+            Validator.Check();
+        }
     }
 }

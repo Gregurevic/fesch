@@ -29,6 +29,9 @@ namespace fesch.Services.Storage.Scheduler
         public List<StructureFragment> Fragments { get; set; }
         private Structures()
         {
+            /// check if DataModels is valid
+            DataModels.Service.Validate();
+            /// partials
             double longExamInfoCount = DataModels.Service.Students.FindAll(
                 s => (s.Language == Language.ENG || s.Level == Level.MSC) && (s.Tution == Tution.INFO || s.Tution == Tution.BPRO)).Count;
             double longExamVillCount = DataModels.Service.Students.FindAll(

@@ -124,6 +124,7 @@
     <Compile Include="Services\Exceptions\EnumConversionException.cs" />
     <Compile Include="Services\Exceptions\NeptunException.cs" />
     <Compile Include="Services\Exceptions\StructureSchedulerException.cs" />
+    <Compile Include="Services\Exceptions\ValidationException.cs" />
     <Compile Include="Services\IO\ExcelActions.cs" />
     <Compile Include="Services\IO\ExcelAction\ExcelLogger.cs" />
     <Compile Include="Services\IO\ExcelAction\ExcelReader.cs" />
@@ -139,6 +140,7 @@
     <Compile Include="Services\Scheduler\Structure\Variables.cs" />
     <Compile Include="Services\Scheduler\Visualizer.cs" />
     <Compile Include="Services\Storage\CustomEnums\CustomEnumConverter.cs" />
+    <Compile Include="Services\Storage\DataModel\Validator.cs" />
     <Compile Include="Services\Storage\Scheduler\Attendants.cs" />
     <Compile Include="Services\Storage\DataModels.cs" />
     <Compile Include="Services\Storage\DataModel\Unit.cs" />
