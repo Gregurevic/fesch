@@ -3,12 +3,13 @@ using fesch.Services.Storage.CustomEnums;
 using fesch.Services.Storage.DataModel;
 using fesch.Services.Storage.Scheduler.AttendantsModel;
 using fesch.Services.Storage.Scheduler.StructureModel;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 
 namespace fesch.Services.Storage.Scheduler
 {
-    class Attendants
+    class Attendants : IDisposable
     {
         private static Attendants instance = null;
         public static Attendants Service
@@ -31,6 +32,8 @@ namespace fesch.Services.Storage.Scheduler
         public int DimensionS { get; set; }
         public int DimensionOS { get; set; } /// ordinal short dimension
         public int DimensionOL { get; set; } /// ordinal long dimension
+        public int DimensionI { get; set; }
+        public int DimensionD { get; set; }
         public int SMEFlattenedLength { get; set; }
         private Attendants()
         {
@@ -131,26 +134,37 @@ namespace fesch.Services.Storage.Scheduler
             DimensionS = Students.Count;
             DimensionOS = 11; /// maximum 11 short exams can be conducted per fragment
             DimensionOL = 9; /// maximum 9 long exams can be conducted per fragment
-            /// getter functions
-            instructorCount = DataModels.Service.Instructors.Count;
-            dayCount = Structures.Service.DimensionD;
-            /// free up memory space by terminating Scheduler-Structure-Storage
-            //[TODO]
+            DimensionI = DataModels.Service.Instructors.Count;
+            DimensionD = Structures.Service.DimensionD;
+            /// free up memory space by terminating Storage/Structures.cs
+            Structures.Service.Dispose();
             /// Finalexams init
             Finalexams = new AttedantsFinalexam[DimensionF, DimensionOS];
         }
 
-        private int instructorCount;
-        private int dayCount;
-
-        public int GetI()
+        /// IDISPOSEABLE
+        private bool _disposed = false;
+        public void Dispose()
         {
-            return instructorCount;
+            Dispose(true);
+            GC.SuppressFinalize(this);
         }
-
-        public int GetD()
+        protected virtual void Dispose(bool disposing)
         {
-            return dayCount;
+            if (_disposed) return;
+            if (disposing)
+            {
+                Students = null;
+                Fragments = null;
+                Availability = null;
+                SME = null;
+                Finalexams = null;
+            }
+            _disposed = true;
+        }
+        ~Attendants()
+        {
+            Dispose(false);
         }
     }
 }

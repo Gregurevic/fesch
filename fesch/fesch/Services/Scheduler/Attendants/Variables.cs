@@ -129,8 +129,8 @@ namespace fesch.Services.Scheduler.Attendant
 
         private static void InitUnavailabilityMatrix()
         {
-            int I = Attendants.Service.GetI();
-            int D = Attendants.Service.GetD();
+            int I = Attendants.Service.DimensionI;
+            int D = Attendants.Service.DimensionD;
             SAM = new double[I, D, OS];
             int time;
             int fromIdx;

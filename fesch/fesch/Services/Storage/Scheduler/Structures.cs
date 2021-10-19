@@ -6,7 +6,7 @@ using System.Collections.Generic;
 
 namespace fesch.Services.Storage.Scheduler
 {
-    public class Structures
+    public class Structures : IDisposable
     {
         private static Structures instance = null;
         public static Structures Service
@@ -80,6 +80,28 @@ namespace fesch.Services.Storage.Scheduler
             Fragments = new List<StructureFragment>();
             /// correct FirstDay according to days needed
             DataModels.Service.FirstDay = DataModels.Service.FirstDay.AddDays(- days);
+        }
+
+        /// IDISPOSEABLE
+        private bool _disposed = false;
+        public void Dispose()
+        {
+            Dispose(true);
+            GC.SuppressFinalize(this);
+        }
+        protected virtual void Dispose(bool disposing)
+        {
+            if (_disposed) return;
+            if (disposing)
+            {
+                Instructors = null;
+                Fragments = null;
+            }
+            _disposed = true;
+        }
+        ~Structures()
+        {
+            Dispose(false);
         }
     }
 }

@@ -4,7 +4,7 @@ using System.Collections.Generic;
 
 namespace fesch.Services.Storage
 {
-    public class DataModels
+    public class DataModels : IDisposable
     {
         private static DataModels instance = null;
         public static DataModels Service
@@ -33,9 +33,33 @@ namespace fesch.Services.Storage
             Instructors = new List<Instructor>();
             Students = new List<Student>();
         }
+
         public void Validate()
         {
             Validator.Check();
+        }
+
+        /// IDISPOSEABLE
+        private bool _disposed = false;
+        public void Dispose()
+        {
+            Dispose(true);
+            GC.SuppressFinalize(this);
+        }
+        protected virtual void Dispose(bool disposing)
+        {
+            if (_disposed) return;
+            if (disposing)
+            {
+                Students = null;
+                Instructors = null;
+                Courses = null;
+            }
+            _disposed = true;
+        }
+        ~DataModels()
+        {
+            Dispose(false);
         }
     }
 }

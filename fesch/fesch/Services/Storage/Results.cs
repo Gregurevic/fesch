@@ -31,9 +31,9 @@ namespace fesch.Services.Storage
                     Finalexams.Add(new Finalexam(Attendants.Service.Finalexams[f, o]));
                 }
             }
-            /// dispose
-            //[TODO] Attendants
-            //[TODO] DataModels
+            /// dispose of Attendants and DataModels
+            Attendants.Service.Dispose();
+            DataModels.Service.Dispose();
         }
     }
 }
