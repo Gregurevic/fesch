@@ -26,5 +26,9 @@ namespace fesch.Services.Storage.CustomAttributes
         {
             return code.Equals(anotherNeptun.Code);
         }
+        public override string ToString()
+        {
+            return code;
+        }
     }
 }

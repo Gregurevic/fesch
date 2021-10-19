@@ -26,6 +26,7 @@ namespace fesch.Services.Storage.Scheduler
         public List<AttendantFragment> Fragments { get; set; }
         public bool[,] Availability { get; set; }
         public AttendantInstructor[][] SME { get; set; }
+        public AttedantsFinalexam[,] Finalexams { get; set; }
         public int DimensionF { get; set; }
         public int DimensionS { get; set; }
         public int DimensionOS { get; set; } /// ordinal short dimension
@@ -135,6 +136,8 @@ namespace fesch.Services.Storage.Scheduler
             dayCount = Structures.Service.DimensionD;
             /// free up memory space by terminating Scheduler-Structure-Storage
             //[TODO]
+            /// Finalexams init
+            Finalexams = new AttedantsFinalexam[DimensionF, DimensionOS];
         }
 
         private int instructorCount;

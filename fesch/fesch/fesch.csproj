@@ -147,10 +147,11 @@
     <Compile Include="Services\Storage\CustomEnums\Level.cs" />
     <Compile Include="Services\Storage\CustomAttributes\Neptun.cs" />
     <Compile Include="Services\Storage\CustomEnums\Tution.cs" />
-    <Compile Include="Services\Storage\FinalExams.cs" />
+    <Compile Include="Services\Storage\Results.cs" />
     <Compile Include="Services\Storage\DataModel\Instructor.cs" />
     <Compile Include="Services\Storage\DataModel\Student.cs" />
-    <Compile Include="Services\Storage\FinalExam\FinalExam.cs" />
+    <Compile Include="Services\Storage\Result\Finalexam.cs" />
+    <Compile Include="Services\Storage\Scheduler\AttendantsModel\AttedantsFinalexam.cs" />
     <Compile Include="Services\Storage\Scheduler\AttendantsModel\AttendantFragment.cs" />
     <Compile Include="Services\Storage\Scheduler\AttendantsModel\AttendantInstructor.cs" />
     <Compile Include="Services\Storage\Scheduler\AttendantsModel\AttendantStudent.cs" />

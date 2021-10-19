@@ -1,5 +1,6 @@
 ﻿using fesch.Services.Storage.CustomAttributes;
 using fesch.Services.Storage.DataModel;
+using System;
 using System.Collections.Generic;
 
 namespace fesch.Services.Storage
@@ -26,7 +27,10 @@ namespace fesch.Services.Storage
             courses = new List<Course>();
             instructors = new List<Instructor>();
             students = new List<Student>();
+            FirstDay = new DateTime(2021, 6, 14);
         }
+        /// gányolás 100
+        public DateTime FirstDay { get; set; }
         /// COURSES
         public List<Course> getCourses()
         {
