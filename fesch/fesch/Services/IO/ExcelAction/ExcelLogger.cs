@@ -5,7 +5,7 @@ using OfficeOpenXml;
 using OfficeOpenXml.Style;
 using System.IO;
 
-namespace fesch.Services.IO.Helper
+namespace fesch.Services.IO.ExcelAction
 {
     static class ExcelLogger
     {
@@ -42,8 +42,8 @@ namespace fesch.Services.IO.Helper
             {
                 w.Cells[1, j].Value = f.DayIndex;
                 w.Cells[2, j].Value = f.ChamberIndex;
-                w.Cells[3, j].Value = DataModels.Service.getInstructor(f.PresidentId).Name;
-                w.Cells[4, j].Value = DataModels.Service.getInstructor(f.SecretaryId).Name;
+                w.Cells[3, j].Value = DataModels.Service.Instructors[f.PresidentId].Name;
+                w.Cells[4, j].Value = DataModels.Service.Instructors[f.SecretaryId].Name;
                 w.Cells[5, j].Value = f.Tution.ToString();
                 j++;
             }

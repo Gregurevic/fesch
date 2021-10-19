@@ -2,8 +2,9 @@
 using fesch.Services.Storage.CustomEnums;
 using fesch.Services.Storage.Scheduler;
 using fesch.Services.Storage.Scheduler.AttendantsModel;
+using System;
 
-namespace fesch.Services.Scheduler.ExamAttendants
+namespace fesch.Services.Scheduler.Attendant
 {
     static class Reader
     {
@@ -17,7 +18,7 @@ namespace fesch.Services.Scheduler.ExamAttendants
             {
                 /// HELPER VARIABLES
                 /// summary
-                string summary = DataModels.Service.FirstDay.AddDays(Attendants.Service.Fragments[f].Day).ToString("yyyy. mm. dd. (dddd)");
+                string summary = DataModels.Service.FirstDay.AddDays(Attendants.Service.Fragments[f].Day + 1).ToString("yyyy. MM. dd. (dddd)");
                 summary += " Terem" + Attendants.Service.Fragments[f].Chamber + " ";
                 summary += Attendants.Service.Fragments[f].Tution.ToString();
                 for (int o = 0; o < OS; o++)
@@ -30,13 +31,14 @@ namespace fesch.Services.Scheduler.ExamAttendants
                             {
                                 /// HELPER VARIABLES
                                 /// time
-                                int time = 8 * 60;
-                                time += Attendants.Service.Students[s].Short ? 60 : 50;
-                                time += o * (Attendants.Service.Students[s].Short ? 40 : 50);
-                                time += Attendants.Service.Students[s].Short ? (o >= 6 ? 50 : 0 ) : (o >= 5 ? 50 : 0);
+                                int minutes = 8 * 60;
+                                minutes += Attendants.Service.Students[s].Short ? 60 : 50;
+                                minutes += o * (Attendants.Service.Students[s].Short ? 40 : 50);
+                                minutes += Attendants.Service.Students[s].Short ? (o >= 6 ? 50 : 0 ) : (o >= 5 ? 50 : 0);
                                 /// courses
-                                string courses = DataModels.Service.getCourses().FindAll(c => c.Neptun.Match(DataModels.Service.getStudents()[s].FirstCourse))[0].Name;
-                                if (!Attendants.Service.Students[s].Short) courses += ", " + DataModels.Service.getCourses().FindAll(c => c.Neptun.Match(DataModels.Service.getStudents()[s].SecondCourse))[0].Name;
+                                string courses = DataModels.Service.Courses.Find(c => c.Neptun.Match(DataModels.Service.Students[s].FirstCourse)).Name;
+                                if (!Attendants.Service.Students[s].Short) 
+                                    courses += ", " + DataModels.Service.Courses.Find(c => c.Neptun.Match(DataModels.Service.Students[s].SecondCourse)).Name;
                                 /// member and examiners
                                 string member = "";
                                 string firstExaminer = "";
@@ -47,15 +49,15 @@ namespace fesch.Services.Scheduler.ExamAttendants
                                     {
                                         if (Attendants.Service.SME[s][me].Member)
                                         {
-                                            member = DataModels.Service.getInstructor(Attendants.Service.SME[s][me].DataModelsId).Name;
+                                            member = DataModels.Service.Instructors[Attendants.Service.SME[s][me].DataModelsId].Name;
                                         }
                                         if (Attendants.Service.SME[s][me].FirstExaminer)
                                         {
-                                            firstExaminer = DataModels.Service.getInstructor(Attendants.Service.SME[s][me].DataModelsId).Name;
+                                            firstExaminer = DataModels.Service.Instructors[Attendants.Service.SME[s][me].DataModelsId].Name;
                                         }
                                         if (!Attendants.Service.Students[s].Short && Attendants.Service.SME[s][me].SecondExaminer)
                                         {
-                                            secondExaminer = DataModels.Service.getInstructor(Attendants.Service.SME[s][me].DataModelsId).Name;
+                                            secondExaminer = DataModels.Service.Instructors[Attendants.Service.SME[s][me].DataModelsId].Name;
                                         }
                                     }
                                 }
@@ -66,18 +68,18 @@ namespace fesch.Services.Scheduler.ExamAttendants
                                     f * OS + o, 
                                     summary, 
                                     (o + 1).ToString() + ".",
-                                    (time / 60).ToString() + ":" + (time % 60).ToString(),
-                                    DataModels.Service.getStudents()[s].Name,
-                                    DataModels.Service.getStudents()[s].Neptun.ToString(), 
-                                    CustomEnumConverter.FromCombination(DataModels.Service.getStudents()[s].Tution, DataModels.Service.getStudents()[s].Level, DataModels.Service.getStudents()[s].Language),
-                                    DataModels.Service.getInstructors().FindAll(i => i.Neptun.Match(DataModels.Service.getStudents()[s].Supervisor))[0].Name, 
+                                    TimeSpan.FromMinutes(minutes).ToString(@"%h\:mm"),
+                                    DataModels.Service.Students[s].Name,
+                                    DataModels.Service.Students[s].Neptun.ToString(), 
+                                    CustomEnumConverter.FromCombination(DataModels.Service.Students[s].Tution, DataModels.Service.Students[s].Level, DataModels.Service.Students[s].Language),
+                                    DataModels.Service.Instructors.Find(i => i.Neptun.Match(DataModels.Service.Students[s].Supervisor)).Name, 
                                     courses, 
                                     "", 
                                     examiners,
-                                    DataModels.Service.getInstructor(Attendants.Service.Fragments[f].PresidentId).Name, 
+                                    DataModels.Service.Instructors[Attendants.Service.Fragments[f].PresidentId].Name, 
                                     member, 
                                     "",
-                                    DataModels.Service.getInstructor(Attendants.Service.Fragments[f].SecretaryId).Name
+                                    DataModels.Service.Instructors[Attendants.Service.Fragments[f].SecretaryId].Name
                                 );
                             }
                         }

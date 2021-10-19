@@ -29,12 +29,12 @@ namespace fesch.Services.Storage.Scheduler
         public List<StructureFragment> Fragments { get; set; }
         private Structures()
         {
-            double longExamInfoCount = DataModels.Service.getStudents().FindAll(
+            double longExamInfoCount = DataModels.Service.Students.FindAll(
                 s => (s.Language == Language.ENG || s.Level == Level.MSC) && (s.Tution == Tution.INFO || s.Tution == Tution.BPRO)).Count;
-            double longExamVillCount = DataModels.Service.getStudents().FindAll(
+            double longExamVillCount = DataModels.Service.Students.FindAll(
                 s => (s.Language == Language.ENG || s.Level == Level.MSC) && s.Tution == Tution.VILL).Count;
-            double shortExamInfoCount = DataModels.Service.getStudents().FindAll(s => s.Tution == Tution.INFO || s.Tution == Tution.BPRO).Count - longExamInfoCount;
-            double shortExamVillCount = DataModels.Service.getStudents().FindAll(s => s.Tution == Tution.VILL).Count - longExamVillCount;
+            double shortExamInfoCount = DataModels.Service.Students.FindAll(s => s.Tution == Tution.INFO || s.Tution == Tution.BPRO).Count - longExamInfoCount;
+            double shortExamVillCount = DataModels.Service.Students.FindAll(s => s.Tution == Tution.VILL).Count - longExamVillCount;
             double infoCount = Math.Ceiling(longExamInfoCount / 8) + Math.Ceiling(shortExamInfoCount / 10);
             double villCount = Math.Ceiling(longExamVillCount / 8) + Math.Ceiling(shortExamVillCount / 10);
             double fragmentCount = infoCount + villCount;
@@ -49,7 +49,7 @@ namespace fesch.Services.Storage.Scheduler
             /// generate Structure instructors from DataModel instructors
             Instructors = new List<StructureInstructor>();
             int timeslotsPerDay = 10;
-            foreach (Instructor i in DataModels.Service.getInstructors())
+            foreach (Instructor i in DataModels.Service.Instructors)
             {
                 if (i.President || i.Secretary)
                 {
@@ -75,6 +75,8 @@ namespace fesch.Services.Storage.Scheduler
                 }
             }
             Fragments = new List<StructureFragment>();
+            /// correct FirstDay according to days needed
+            DataModels.Service.FirstDay = DataModels.Service.FirstDay.AddDays(- days);
         }
     }
 }

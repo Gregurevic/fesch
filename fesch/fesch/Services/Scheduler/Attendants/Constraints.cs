@@ -1,7 +1,7 @@
 ﻿using fesch.Services.Storage.Scheduler;
 using Gurobi;
 
-namespace fesch.Services.Scheduler.ExamAttendants
+namespace fesch.Services.Scheduler.Attendant
 {
     static class Constraints
     {

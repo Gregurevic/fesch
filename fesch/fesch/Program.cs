@@ -1,5 +1,6 @@
 ﻿using fesch.Services.IO;
 using fesch.Services.Scheduler;
+using fesch.Services.Storage;
 
 namespace fesch
 {
@@ -7,19 +8,19 @@ namespace fesch
     {
         public static void Main(string[] args)
         {
-            /// külső adatforrás
+            /// data, acquired from external source
             string inputPath = "C://Munka//bme//onlab//fesch//input//input_001.xlsx";
             string logPath = "C://Munka//bme//onlab//fesch//output//log_001.xlsx";
             string outputPath = "C://Munka//bme//onlab//fesch//output//output_001.xlsx";
-            bool timeLimit = false;
-            int dayCount = 4;
-            /// funkcionalitás
-            Excel.Service.Read(inputPath);
-            if (timeLimit) { Scheduler.Service.ScheduleExamStructure(dayCount); }
-                else { Scheduler.Service.ScheduleExamStructure(); }
-            Excel.Service.LogExamStructure(logPath);
-            Scheduler.Service.ScheduleExamAttendants();
-            Excel.Service.Write(outputPath);
+            /// Program functionality
+            ExcelActions.Service.Read(inputPath);
+            if (!DataModels.Service.TimeLimit)
+            {
+                Scheduler.Service.ScheduleExamStructure();
+                ExcelActions.Service.LogExamStructure(logPath);
+                Scheduler.Service.ScheduleExamAttendants();
+                ExcelActions.Service.Write(outputPath);
+            }
         }
     }
 }

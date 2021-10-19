@@ -5,7 +5,7 @@ using OfficeOpenXml.Style;
 using System.Drawing;
 using System.IO;
 
-namespace fesch.Services.IO.Helper
+namespace fesch.Services.IO.ExcelAction
 {
     static class ExcelWriter
     {

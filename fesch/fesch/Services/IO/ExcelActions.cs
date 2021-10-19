@@ -1,31 +1,31 @@
-﻿using fesch.Services.IO.Helper;
+﻿using fesch.Services.IO.ExcelAction;
 
 namespace fesch.Services.IO
 {
-    public class Excel
+    public class ExcelActions
     {
-        private static Excel instance = null;
-        public static Excel Service
+        private static ExcelActions instance = null;
+        public static ExcelActions Service
         {
             get
             {
                 if (instance == null)
                 {
-                    instance = new Excel();
+                    instance = new ExcelActions();
                 }
                 return instance;
             }
         }
-        private Excel() { }
-        public void Read(string source = "default", bool secondaryExaminers = false)
+        private ExcelActions() { }
+        public void Read(string source, bool secondaryExaminers = false)
         {
             ExcelReader.Read(source, secondaryExaminers);
         }
-        public void LogExamStructure(string destination = "default")
+        public void LogExamStructure(string destination)
         {
             ExcelLogger.LogExamStructure(destination);
         }
-        public void Write(string destination = "default")
+        public void Write(string destination)
         {
             ExcelWriter.Write(destination);
         }
