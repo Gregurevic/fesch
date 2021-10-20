@@ -187,20 +187,20 @@ namespace fesch.Services.Scheduler.Attendant
 
         private static void sor_PreferLesserOrdinals(GRBModel model)
         {
-            GRBLinExpr[] sums = new GRBLinExpr[OS];
-            for (int o = 0; o < OS; o++)
+            GRBLinExpr[] sums = new GRBLinExpr[OS * F];
+            for (int fo = 0; fo < OS * F; fo++) { sums[fo] = 0; }
+            for (int f = 0; f < F; f++)
             {
-                sums[o] = 0;
-                for (int s = 0; s < S; s++)
+                for (int o = 0; o < OS; o++)
                 {
-                    if (o < Variables.sor[s].Length)
+                    for (int s = 0; s < S; s++)
                     {
-                        sums[o].AddTerm(1, Variables.sor[s][o]);
+                        if (o < Variables.sor[s].Length)
+                        {
+                            sums[f * OS + o].AddTerm(1, Variables._constraint_no_duplicate_ordinals[f * OS * S + o * S + s]);
+                        }
                     }
-                }
-                if (o >= 1)
-                {
-                    model.AddConstr(sums[o] <= sums[o - 1], "sor_PreferLesserOrdinals_" + o);
+                    if (o != 0) model.AddQConstr(sums[f * OS + o] <= sums[f * OS + o - 1], "sor_PreferLesserOrdinals_" + f + "_" + o);
                 }
             }
         }
