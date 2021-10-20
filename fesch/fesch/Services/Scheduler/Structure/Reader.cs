@@ -49,8 +49,8 @@ namespace fesch.Services.Scheduler.Structure
                             index,
                             d,
                             c,
-                            Structures.Service.Instructors[iIndex1].Id,
-                            Structures.Service.Instructors[iIndex2].Id,
+                            Structures.Service.Instructors[iIndex1].President ? Structures.Service.Instructors[iIndex1].Id : Structures.Service.Instructors[iIndex2].Id,
+                            Structures.Service.Instructors[iIndex1].Secretary ? Structures.Service.Instructors[iIndex1].Id : Structures.Service.Instructors[iIndex2].Id,
                             FragmentTution
                         ));
                         index++;

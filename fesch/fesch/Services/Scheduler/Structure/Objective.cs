@@ -46,13 +46,13 @@ namespace fesch.Services.Scheduler.Structure
             for (int p = 0; p < P; p++)
             {
                 penalty.AddTerm(1 / P, Variables._objective_PresidentPositiveDeviation[p]);
-                penalty.AddTerm(- 1 / P, Variables._objective_PresidentNegativeDeviation[p]);
+                penalty.AddTerm(1 / P, Variables._objective_PresidentNegativeDeviation[p]);
             }
             int S = Structures.Service.Instructors.FindAll(i => i.Secretary).Count;
             for (int s = 0; s < S; s++)
             {
                 penalty.AddTerm(1 / S, Variables._objective_SecretaryPositiveDeviation[s]);
-                penalty.AddTerm(-1 / S, Variables._objective_SecretaryNegativeDeviation[s]);
+                penalty.AddTerm(1 / S, Variables._objective_SecretaryNegativeDeviation[s]);
             }
             return penalty *penaltyScore;
         }
