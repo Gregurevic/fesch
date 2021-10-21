@@ -225,7 +225,7 @@ namespace fesch.Services.Scheduler.Attendant
                 /// fill expressions with correlating data
                 for (int me = 0; me < Variables.sme[s].Length; me++)
                 {
-                    if (Attendants.Service.SME[s][me].Member)
+                    if (Attendants.Service.SME[s][me].Member && Attendants.Service.SME[s][me].Tutions.Contains(Attendants.Service.Students[s].Tution))
                     {
                         sumsM[s].AddTerm(1, Variables.sme[s][me]);
                     }
